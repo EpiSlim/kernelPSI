@@ -1,0 +1,77 @@
+#include <RcppArmadillo.h>
+using namespace Rcpp;
+
+// This is a simple example of exporting a C++ function to R. You can
+// source this function into an R session using the Rcpp::sourceCpp
+// function (or via the Source button on the editor toolbar). Learn
+// more about Rcpp at:
+//
+//   http://www.rcpp.org/
+//   http://adv-r.had.co.nz/Rcpp.html
+//   http://gallery.rcpp.org/
+//
+
+// [[Rcpp::plugins(cpp11)]]
+// [[Rcpp::depends(RcppArmadillo)]]
+
+// [[Rcpp::export]]
+double HSIC(arma::mat K, arma::mat L)
+{
+
+    int n = K.n_rows;
+
+    arma::mat KK = K - arma::diagmat(K);
+    arma::mat LL = L - arma::diagmat(L);
+    arma::mat KL = KK * LL;
+
+    double hsic = (arma::trace(KL) + arma::accu(KK) * arma::accu(LL) / ((n - 1) * (n - 2))
+                   - 2 * arma::accu(KL) / (n - 2)) / (n * (n - 3));
+
+    return hsic;
+}
+
+// [[Rcpp::export]]
+arma::mat quadHSIC(arma::mat K)
+{
+    int n = K.n_rows;
+
+    arma::mat Q = K - arma::diagmat(K) +
+                   arma::accu(K - arma::diagmat(K)) *
+                   (arma::ones(size(K)) - arma::eye(size(K)))/ ((n - 1) * (n - 2)) -
+                   (2 / (n -2)) * (arma::ones(size(K)) * K - arma::diagmat(arma::ones(size(K)) * K) -
+                                   arma::ones(size(K)) * arma::diagmat(K) +
+                                   arma::diagmat(arma::ones(size(K)) * arma::diagmat(K)));
+
+    return Q;
+}
+
+
+// You can include R code blocks in C++ files processed with sourceCpp
+// (useful for testing and development). The R code will be automatically
+// run after the compilation.
+//
+
+/*** R
+require("pracma")
+n <- 20
+K <- matrix(rnorm(n*n), ncol = n, nrow = n)
+Y <- rnorm(n)
+L <- Y %*% t(Y)
+Qmat <- quadHSIC(K)
+print(drop(t(Y) %*% Qmat %*% Y /(n * (n -3))))
+print(HSIC(K, L))
+assertthat::are_equal(drop(t(Y) %*% Qmat %*% Y /(n * (n -3))), HSIC(K, L))
+
+RHSIC <- function(K) {
+  n <- dim(K)[[1]]
+  Q <- (K - diag(diag(K)) +
+    Reduce(`+`, K - diag(diag(K))) * (ones(n) - eye(n)) / ((n - 1) * (n - 2)) -
+    (2 / (n - 2)) * (ones(n) %*% K - diag(diag(ones(n) %*% K)) -
+      ones(n) %*% diag(diag(K)) + diag(diag(ones(n) %*% diag(diag(K))))))
+
+  return(Q)
+}
+
+Rmat <- RHSIC(K)
+
+*/
