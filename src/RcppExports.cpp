@@ -19,6 +19,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// forwardQ
+arma::field<arma::mat> forwardQ(arma::field<arma::mat> K, IntegerVector select);
+RcppExport SEXP _kernelPSI_forwardQ(SEXP KSEXP, SEXP selectSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::field<arma::mat> >::type K(KSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type select(selectSEXP);
+    rcpp_result_gen = Rcpp::wrap(forwardQ(K, select));
+    return rcpp_result_gen;
+END_RCPP
+}
 // HSIC
 double HSIC(arma::mat K, arma::mat L);
 RcppExport SEXP _kernelPSI_HSIC(SEXP KSEXP, SEXP LSEXP) {
@@ -64,6 +76,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_kernelPSI_FOHSIC", (DL_FUNC) &_kernelPSI_FOHSIC, 3},
+    {"_kernelPSI_forwardQ", (DL_FUNC) &_kernelPSI_forwardQ, 2},
     {"_kernelPSI_HSIC", (DL_FUNC) &_kernelPSI_HSIC, 2},
     {"_kernelPSI_quadHSIC", (DL_FUNC) &_kernelPSI_quadHSIC, 1},
     {"_kernelPSI_sampleH", (DL_FUNC) &_kernelPSI_sampleH, 9},
