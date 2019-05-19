@@ -2,6 +2,16 @@
 #include "hsic.h"
 using namespace Rcpp;
 
+// This is a simple example of exporting a C++ function to R. You can
+// source this function into an R session using the Rcpp::sourceCpp
+// function (or via the Source button on the editor toolbar). Learn
+// more about Rcpp at:
+//
+//   http://www.rcpp.org/
+//   http://adv-r.had.co.nz/Rcpp.html
+//   http://gallery.rcpp.org/
+//
+
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
@@ -27,7 +37,7 @@ List adaFOHSIC(arma::field<arma::mat> K, arma::mat L)
         *h = HSIC(Ksum, L);
     }
 
-    return List::create(Rcpp::Named("selection") = selection + 1,
+    return List::create(Rcpp::Named("selection") = selection.as_row() + 1,
                         Rcpp::Named("n") = index_max(HSICsum) + 1);
 
 }
@@ -42,22 +52,19 @@ arma::field<arma::mat> adaQ(arma::field<arma::mat> K, IntegerVector select, int 
         constraintQ(s) = quadHSIC(K(select(s) - 1)) - quadHSIC(K(select(s + 1) - 1));
     }
 
-    arma::field<arma::mat> HSICsum(K.n_elem);
+    arma::field<arma::mat> HSICsum;
     arma::mat HSICroll(size(K(0)), arma::fill::zeros);
-    for (s = 0; s != select.size(); ++s)
-    {
-        HSICroll += quadHSIC(K(select(s) - 1));
-        HSICsum(s) = HSICroll;
+    for (s = 0; s != select.size(); ++s){
+       HSICroll += quadHSIC(K(select(s)));
+       HSICsum(s) = HSICroll;
     }
 
     int r = select.size() - 1;
-    for(s = 0; s!= select.size(); ++s)
-    {
-        if (s != (n - 1))
-        {
-            constraintQ(r) = HSICsum(n - 1) - HSICsum(s);
-            r += 1;
-        }
+    for(s = 0; s!= select.size(); ++s){
+     if (s != (n - 1)){
+       constraintQ(r) = HSICsum(n - 1) - HSICsum(s);
+       r += 1;
+     }
     }
 
     return constraintQ;
@@ -69,10 +76,10 @@ arma::field<arma::mat> adaQ(arma::field<arma::mat> K, IntegerVector select, int 
 //
 
 /*** R
-nconstraints <- 20
-n <- 200
+nconstraints <- 40
+n <- 20
 K <- replicate(nconstraints, matrix(rnorm(n*n), ncol = n, nrow = n), simplify = FALSE)
 L <- matrix(rnorm(n*n), ncol = n, nrow = n)
 aa <- adaFOHSIC(K, L)
-bb <- adaQ(K, drop(aa$selection), aa$n)
+bb <- adaQ(K, aa$selection, aa$n)
 */
