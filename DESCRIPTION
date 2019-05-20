@@ -1,11 +1,19 @@
 Package: kernelPSI
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
+Title: Post-Selection Inference for Nonlinear Variable Selection
+Version: 1.0.0
 Date: 2019-05-15
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Authors@R: c(person("Lotfi", "Slim", email = "lotfi.slim@mines-paristech.fr", role = c("aut", "cre")),
+  person("Clément", "Chatelain", email = "clement.chatelain@sanofi.com", role = "ctb"),
+  person("Chloé-Agathe", "Azencott", email = "chloe-agathe.azencott@mines-paristech.fr", role ="ctb"),
+  person("Jean-Philippe", "Vert", email = "jpvert@google.com", role ="ctb"))
 Description: More about what it does (maybe more than one line)
-License: What license is it under?
-Imports: Rcpp (>= 1.0.1)
+Depends: R (>= 3.5.0)
+License: GPL (>=2)
+Imports: Rcpp (>= 1.0.1), CompQuadForm, tmg, pracma, kernlab
+Suggests: bindata,
+    knitr,
+    rmarkdown
+Encoding: UTF-8
 LinkingTo: Rcpp, RcppArmadillo
+VignetteBuilder: knitr
