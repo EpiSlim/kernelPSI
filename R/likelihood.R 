@@ -1,5 +1,4 @@
 # Maximum likelihood ratio test (RSS difference)  -----------------
-#' @export
 maxLR <- function(X, Y) {
   glm.fit <- glm(Y ~ X)
   ratio <- lmtest::lrtest(glm.fit)[2, "Pr(>Chisq)"]
@@ -8,7 +7,6 @@ maxLR <- function(X, Y) {
 }
 
 # Anova testing (scaled RSS testing) -----------------
-#' @export
 anovaLR <- function(X, Y) {
   glm.fit <- glm(Y ~ X)
   ratio <- anova(glm.fit, test = "LRT")[2, "Pr(>Chi)"]
