@@ -39,11 +39,11 @@ pcaLR <- function(K, mu = 0, sigma = 1) {
   }
 
   if (class(Ksum) != "kernelMatrix") {
-    Ksum <- as.kernelMatrix(Ksum, center = FALSE)
+    Ksum <- kernlab::as.kernelMatrix(Ksum, center = FALSE)
   }
 
-  Krot <- kpca(Ksum)@rotated
-  H <- Krot %*% pinv(Krot)
+  Krot <- kernlab::kpca(Ksum)@rotated
+  H <- Krot %*% pracma::pinv(Krot)
   M <- sum(eigen(H, symmetric = TRUE, only.values = TRUE)[["values"]] > 0.5) # only possible eigenvalues: 0 or 1
 
   statistic <- function(Y) {

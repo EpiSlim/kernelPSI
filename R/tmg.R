@@ -12,8 +12,8 @@ sampleQ <- function(Q, n_replicates = 1e+3, mu = 0, sigma = 1, n_iter = 1e+4){
     while (is.null(samples) && iter <= n_iter) {
       iter <- iter + 1
       samples <- tryCatch(
-                    rtmg(n = n_replicates, M = eye(n) / sigma^2, r = rep(mu, n) / sigma^2,
-                         initial = rnorm(n, mean = mu, sd = sigma),
+                    tmg::rtmg(n = n_replicates, M = pracma::eye(n) / sigma^2, r = rep(mu, n) / sigma^2,
+                         initial = stats::rnorm(n, mean = mu, sd = sigma),
                          f = NULL, g = NULL, burn.in = 100,
                          q = Q),
                     error = function(e) return(NULL)
