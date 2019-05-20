@@ -62,17 +62,3 @@ arma::field<arma::mat> adaQ(arma::field<arma::mat> K, IntegerVector select, int 
 
     return constraintQ;
 }
-
-// You can include R code blocks in C++ files processed with sourceCpp
-// (useful for testing and development). The R code will be automatically
-// run after the compilation.
-//
-
-/*** R
-nconstraints <- 20
-n <- 200
-K <- replicate(nconstraints, matrix(rnorm(n*n), ncol = n, nrow = n), simplify = FALSE)
-L <- matrix(rnorm(n*n), ncol = n, nrow = n)
-aa <- adaFOHSIC(K, L)
-bb <- adaQ(K, drop(aa$selection), aa$n)
-*/

@@ -35,34 +35,3 @@ arma::mat quadHSIC(arma::mat K)
 
     return Q;
 }
-
-
-// You can include R code blocks in C++ files processed with sourceCpp
-// (useful for testing and development). The R code will be automatically
-// run after the compilation.
-//
-
-/*** R
-require("pracma")
-n <- 20
-K <- matrix(rnorm(n*n), ncol = n, nrow = n)
-Y <- rnorm(n)
-L <- Y %*% t(Y)
-Qmat <- quadHSIC(K)
-
-RHSIC <- function(K) {
-  n <- dim(K)[[1]]
-  Q <- (K - diag(diag(K)) +
-    Reduce(`+`, K - diag(diag(K))) * (ones(n) - eye(n)) / ((n - 1) * (n - 2)) -
-    (2 / (n - 2)) * (ones(n) %*% K - diag(diag(ones(n) %*% K)) -
-      ones(n) %*% diag(diag(K)) + diag(diag(ones(n) %*% diag(diag(K))))))
-
-  return(Q)
-}
-
-Rmat <- RHSIC(K)
-
-Qmat[1:5, 1:5]
-Rmat[1:5, 1:5]
-
-*/

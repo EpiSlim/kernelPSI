@@ -49,17 +49,3 @@ arma::field<arma::mat> forwardQ(arma::field<arma::mat> K, IntegerVector select)
     }
     return constraintQ;
 }
-
-// You can include R code blocks in C++ files processed with sourceCpp
-// (useful for testing and development). The R code will be automatically
-// run after the compilation.
-//
-
-/*** R
-nconstraints <- 40
-n <- 20
-K <- replicate(nconstraints, matrix(rnorm(n*n), ncol = n, nrow = n), simplify = FALSE)
-L <- matrix(rnorm(n*n), ncol = n, nrow = n)
-aa <- FOHSIC(K, L, nconstraints %/% 2)
-bb <- forwardQ(K, aa)
-*/
