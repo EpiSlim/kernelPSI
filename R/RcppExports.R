@@ -9,18 +9,100 @@ adaQ <- function(K, select, n) {
     .Call(`_kernelPSI_adaQ`, K, select, n)
 }
 
+#' selects a fixed number of kernels which are most associated with the
+#' outcome kernel. 
+#' 
+#' @param K list of kernel similarity matrices 
+#' @param L kernel similarity matrix for the outcome
+#' @param mKernels number of kernels to be selected
+#' 
+#' @return an integer vector containing the indices of the selected kernels 
+#' 
+#' @examples
+#' n <- 50
+#' p <- 20
+#' K <- replicate(5, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
+#' L <- matrix(rnorm(n*p), nrow = n, ncol = p)
+#' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
+#' L <-  L %*% t(L) / p 
+#' selection <- FOHSIC(K, L, 2)
+#' 
+#' @export
 FOHSIC <- function(K, L, mKernels = 1L) {
     .Call(`_kernelPSI_FOHSIC`, K, L, mKernels)
 }
 
+#' models the forward selection event of a fixed number of kernels as a 
+#' succession of quadratic constraints
+#' 
+#' @param K list kernel similarity matrices
+#' @param select integer vector containing the indices of the selected kernels
+#' 
+#' @return list of matrices modeling the quadratic constraints of the 
+#' selection event 
+#' 
+#' @examples
+#' n <- 50
+#' p <- 20
+#' K <- replicate(5, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
+#' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
+#' listQ <- forwardQ(K, select = c(4, 1))
+#' @export
 forwardQ <- function(K, select) {
     .Call(`_kernelPSI_forwardQ`, K, select)
 }
 
+#' Computes the HSIC cirterion for two given kernels
+#' 
+#' The Hilbert-Schmidt Independence Criterion (HSIC) is a measure of indepedence 
+#' between two random variables. If characteristic kernels are used for both
+#' variables, the HSIC is zero iff the variables are independent. In this 
+#' function, we implement an unbiased estimator for the HSIC measure. Specifically, 
+#' for two positive-definite kernels \eqn{K} and \eqn{L} and a sample size 
+#' \eqn{n}, the unbiased HSIC estimator is: 
+#' \deqn{HSIC(K, L) = \frac{1}{n(n-3)} \left[trace(KL) + \frac{1^\top K11^\top L 1}{(n-1)(n-2)}- \frac{2}{n-2}1^\top KL\right]}
+#' 
+#' @param K first kernel similarity matrix
+#' @param L second kernel similarity matrix
+#' 
+#' @return an unbiased estimate of the HSIC measure. 
+#' 
+#' @references Song, L., Smola, A., Gretton, A., Borgwardt, K., & Bedo, J. 
+#' (2007). Supervised Feature Selection via Dependence Estimation. 
+#' https://doi.org/10.1145/1273496.1273600
+#' 
+#' @examples
+#' n <- 50
+#' p <- 20 
+#' X <- matrix(rnorm(n*p), nrow = n, ncol = p)
+#' Y <- matrix(rnorm(n*p), nrow = n, ncol = p)
+#' K <-  X %*% t(X) / p 
+#' L <-  X %*% t(Y) / p 
+#' uHSIC <- HSIC(K, L)
+#' 
+#' @export
 HSIC <- function(K, L) {
     .Call(`_kernelPSI_HSIC`, K, L)
 }
 
+#' Determines the quadratic form of the HSIC unbiased estimator
+#' 
+#' For a linear kernel of the outcome \eqn{L = Y^\top Y}, the unbiased HSIC 
+#' estimator implemented in \code{\link{HSIC}} can be expressed as a quadratic
+#' form of the outcome \eqn{Y} i.e. \eqn{HSIC(K, L) = Y^\top Q(K) Y}. Here, 
+#' the matrix \eqn{Q} only depends on the kernel similarity matrix \eqn{K}. 
+#' 
+#' @param K kernel similarity matrix
+#' 
+#' @return the matrix of the HSIC estimator quadratic form
+#' 
+#' @examples
+#' n <- 50
+#' p <- 20 
+#' X <- matrix(rnorm(n*p), nrow = n, ncol = p)
+#' K <-  X %*% t(X) / p
+#' Q <- quadHSIC(K)
+#' @export
 quadHSIC <- function(K) {
     .Call(`_kernelPSI_quadHSIC`, K)
 }
