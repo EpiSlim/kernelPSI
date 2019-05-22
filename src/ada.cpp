@@ -5,27 +5,21 @@ using namespace Rcpp;
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
-//' selects a fixed number of kernels which are most associated with the
-//' outcome kernel.
+//' adaptively selects a subset of kernels in a forward fashion.
 //'
-//' This function implements a foward algorithm for kernel selection. In the
-//' first step, the kernel which maximizes the HSIC measure with the outcome
-//' kernel \code{L} is selected. In the subsequent iterations, the kernel which,
-//' combined with the selected kernels maximizes the HSIC measure is selected.
-//' For the sum kernel combination rule, the forward algorithm can be
-//' simplified. The kernels which maximize the HSIC measure with the kernel
-//' \code{L} are selected in a descending order.
-//'
-//' \code{\link{FOHSIC}} implements the forward algorithm with a predetermined
-//' number of kernels \code{mKernels}. If the exact number of causal kernels is
-//' unavailable, the adaptive version \code{\link{adaFOHSIC}} should be
-//' preferred.
+//' This function is similar to the \code{\link{FOHSIC}} function. The only 
+//' difference lies in the adpative selection of the number of causal kernels.
+//' First, similarly to \code{\link{FOHSIC}}, the order of selection of the 
+//' \eqn{n} kernels in \code{K} is determined, and then, the size of the subset
+//' of ordered kernels is chosen. The size is chosen as to maximize the overall 
+//' association with the kernel L.
 //'
 //' @param K list of kernel similarity matrices
 //' @param L kernel similarity matrix for the outcome
-//' @param mKernels number of kernels to be selected
 //'
-//' @return an integer vector containing the indices of the selected kernels
+//' @return a list where the the first item \code{selection} is the order of
+//' selection of all kernels in the list \code{K} and the second item is the
+//' number of selected kernels. 
 //'
 //' @examples
 //' n <- 50
@@ -34,7 +28,8 @@ using namespace Rcpp;
 //' L <- matrix(rnorm(n*p), nrow = n, ncol = p)
 //' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
 //' L <-  L %*% t(L) / p
-//' selection <- adaFOHSIC(K, L)
+//' adaS <- adaFOHSIC(K, L)
+//' print(names(adaS) == c("selection", "n"))
 //'
 //' @export
 // [[Rcpp::export]]
@@ -64,6 +59,39 @@ List adaFOHSIC(arma::field<arma::mat> K, arma::mat L)
 
 }
 
+//' models the forward selection of the kernels for the adpative variant
+//'
+//' Similarly to the fixed variant, the adaptive selection of the 
+//' kernels in a forward fashion can also be modeled with a set of 
+//' quadratic constraints. The constraints for adaptive selection can be split
+//' into two subsets. The first subset encodes the order of selection of the 
+//' kernels, while the second subset encodes the selection of the number of the
+//' kernels. The two subsets are equally sized (\code{length(K) - 1}) and are 
+//' sequentially included in the output list. 
+//' 
+//' @param K list kernel similarity matrices
+//' @param select integer vector containing the order of selection of the kernels 
+//' in \code{K}. Typically, the \code{selection} field of the output of 
+//' \code{\link{FOHSIC}}. 
+//' @param n number of selected kernels. Typically, the \code{n} field of the 
+//' output of \code{\link{adaFOHSIC}}. 
+//'
+//' @return list of matrices modeling the quadratic constraints of the
+//' adaptive selection event
+//' 
+//' @references Loftus, J. R., & Taylor, J. E. (2015). Selective inference in 
+//' regression models with groups of variables.
+//'
+//' @examples
+//' n <- 50
+//' p <- 20
+//' K <- replicate(8, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
+//' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
+//' L <- matrix(rnorm(n*p), nrow = n, ncol = p)
+//' L <-  L %*% t(L) / p
+//' adaS <- adaFOHSIC(K, L)
+//' listQ <- adaQ(K, select = adaS[["selection"]], n = adaS[["n"]])
+//' @export
 // [[Rcpp::export]]
 arma::field<arma::mat> adaQ(arma::field<arma::mat> K, IntegerVector select, int n)
 {
