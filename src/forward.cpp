@@ -6,23 +6,36 @@ using namespace Rcpp;
 // [[Rcpp::depends(RcppArmadillo)]]
 
 //' selects a fixed number of kernels which are most associated with the
-//' outcome kernel. 
-//' 
-//' @param K list of kernel similarity matrices 
+//' outcome kernel.
+//'
+//' This function implements a foward algorithm for kernel selection. In the
+//' first step, the kernel which maximizes the HSIC measure with the outcome
+//' kernel \code{L} is selected. In the subsequent iterations, the kernel which,
+//' combined with the selected kernels maximizes the HSIC measure is selected.
+//' For the sum kernel combination rule, the forward algorithm can be
+//' simplified. The kernels which maximize the HSIC measure with the kernel
+//' \code{L} are selected in a descending order.
+//'
+//' \code{\link{FOHSIC}} implements the forward algorithm with a predetermined
+//' number of kernels \code{mKernels}. If the exact number of causal kernels is
+//' unavailable, the adaptive version \code{\link{adaFOHSIC}} should be
+//' preferred.
+//'
+//' @param K list of kernel similarity matrices
 //' @param L kernel similarity matrix for the outcome
 //' @param mKernels number of kernels to be selected
-//' 
-//' @return an integer vector containing the indices of the selected kernels 
-//' 
+//'
+//' @return an integer vector containing the indices of the selected kernels
+//'
 //' @examples
 //' n <- 50
 //' p <- 20
 //' K <- replicate(5, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
 //' L <- matrix(rnorm(n*p), nrow = n, ncol = p)
 //' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
-//' L <-  L %*% t(L) / p 
+//' L <-  L %*% t(L) / p
 //' selection <- FOHSIC(K, L, 2)
-//' 
+//'
 //' @export
 // [[Rcpp::export]]
 IntegerVector FOHSIC(arma::field<arma::mat> K, arma::mat L, int mKernels = 1)
@@ -43,15 +56,24 @@ IntegerVector FOHSIC(arma::field<arma::mat> K, arma::mat L, int mKernels = 1)
 
 }
 
-//' models the forward selection event of a fixed number of kernels as a 
+//' models the forward selection event of a fixed number of kernels as a
 //' succession of quadratic constraints
-//' 
+//'
+//' The selection of the kernels with the forward algorithm implemented in
+//' \code{\link{FOHSIC}} can be represented as a set of quadratic constraints.
+//' This is owed to the quadratic form of the HSIC criterion. In this function,
+//' we determine the matrices of the corresponding constraints. The output is a
+//' list of matrices where the order is identical to the order of selection
+//' of the kernels. The matrices are computed such the associated constraint is
+//' nonnegative. For a length \eqn{n} of the list K, the total number of
+//' constraints is \eqn{n - 1}. 
+//'
 //' @param K list kernel similarity matrices
 //' @param select integer vector containing the indices of the selected kernels
-//' 
-//' @return list of matrices modeling the quadratic constraints of the 
-//' selection event 
-//' 
+//'
+//' @return list of matrices modeling the quadratic constraints of the
+//' selection event
+//'
 //' @examples
 //' n <- 50
 //' p <- 20
