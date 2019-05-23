@@ -236,12 +236,12 @@ quadHSIC <- function(K) {
 #' p <- 20
 #' K <- replicate(5, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
 #' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
-#' L <- matrix(rnorm(n*p), nrow = n, ncol = p)
-#' L <-  L %*% t(L) / p
+#' Y <- rnorm(n) 
+#' L <- Y %*% t(Y)  
 #' selection <- FOHSIC(K, L, 2)
 #' constraintQ <- forwardQ(K, select = selection)
-#' samples <- sampleH(A = constraintQ, initial = rep(0, n),
-#'                    n_replicates = 100, burn_in = 20)
+#' samples <- sampleH(A = constraintQ, initial = Y,
+#'                    n_replicates = 50, burn_in = 20)
 #' @export
 sampleH <- function(A, initial, n_replicates, mu = 0.0, sigma = 1.0, n_iter = 1.0e+5, burn_in = 1.0e+3) {
     .Call(`_kernelPSI_sampleH`, A, initial, n_replicates, mu, sigma, n_iter, burn_in)

@@ -52,12 +52,12 @@ using namespace Rcpp;
 //' p <- 20
 //' K <- replicate(5, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
 //' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
-//' L <- matrix(rnorm(n*p), nrow = n, ncol = p)
-//' L <-  L %*% t(L) / p
+//' Y <- rnorm(n) 
+//' L <- Y %*% t(Y)  
 //' selection <- FOHSIC(K, L, 2)
 //' constraintQ <- forwardQ(K, select = selection)
-//' samples <- sampleH(A = constraintQ, initial = rep(0, n),
-//'                    n_replicates = 100, burn_in = 20)
+//' samples <- sampleH(A = constraintQ, initial = Y,
+//'                    n_replicates = 50, burn_in = 20)
 //' @export
 // [[Rcpp::export]]
 arma::mat sampleH(arma::field<arma::mat> A, NumericVector initial, int n_replicates,
