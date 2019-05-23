@@ -1,3 +1,27 @@
+#' implements the sequence kernel association
+#'
+#' The maximum likelihood ratio test is a classical goodness-of-fit
+#' test for linear models. Mathematically speaking, the average
+#' residual sum of squares for an ordinary least squares (OLS) is
+#' approximated as a chi-square distribution to generate a \eqn{p}-value.
+#'
+#' null hypothesis
+#'
+#'
+#' @param K list of kernel similarity matrices
+#' @param Y response vector
+#' @param sigma standard deviation of the response Y
+#'
+#' @return \eqn{p}-value of the SKAt test
+#'
+#' @examples
+#' n <- 50
+#' p <- 20
+#' X <- matrix(rnorm(n*p), nrow = n, ncol = p)
+#' Y <- rnorm(n)
+#' stat.likelihood <- maxLR(X, Y)
+#'
+#' @export
 SKAT <- function(Y, K, sigma = 1){
  if (is.list(K)) {
     Ksum <- Reduce(`+`, K)
