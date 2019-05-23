@@ -34,11 +34,12 @@ contains a sample within the acceptance region
 In addition to our sampler \code{\link{sampleH}}, we include another sampler 
 from the literature (see references) to sample replicates within the 
 acceptance region. Similary to \code{\link{sampleH}}, \code{\link{sampleQ}}
-covers second-order constraints and is based on Monte-Carlo chain iterative 
-sampling.
+covers second-order constraints for truncated gaussians and is based on 
+Monte-Carlo chain iterative sampling.
 }
 \details{
-In our simulatons, our
+In our simulatons, \code{\link{sampleH}} was substantially faster 
+\code{\link{sampleQ}}.
 }
 \examples{
 n <- 30

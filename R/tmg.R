@@ -59,7 +59,7 @@ sampleQ <- function(Q, initial = NULL, n_replicates = 1e+3, mu = 0, sigma = 1, b
         samples <- tryCatch(
           tmg::rtmg(n = n_replicates, M = pracma::eye(n) / sigma^2, r = rep(mu, n) / sigma^2,
                     initial = stats::rnorm(n, mean = mu, sd = sigma),
-                    f = NULL, g = NULL, burn.in = brun_in,
+                    f = NULL, g = NULL, burn.in = burn_in,
                     q = Q),
           error = function(e) return(NULL)
         )
@@ -67,7 +67,7 @@ sampleQ <- function(Q, initial = NULL, n_replicates = 1e+3, mu = 0, sigma = 1, b
     } else {
       samples <- tmg::rtmg(n = n_replicates, M = pracma::eye(n) / sigma^2, r = rep(mu, n) / sigma^2,
                            initial = initial,
-                           f = NULL, g = NULL, burn.in = brun_in,
+                           f = NULL, g = NULL, burn.in = burn_in,
                            q = Q)
     }
 
