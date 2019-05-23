@@ -1,3 +1,26 @@
+#'
+#'
+#' @param K a single or a list of kernel similarity matrices.
+#' @param mu mean of the response Y
+#' @param sigma standard deviation of the response
+#' @param lambda
+#' @param tol
+#' @param n_iter
+#'
+#' @return
+#'
+#' @examples
+#' n <- 30
+#' p <- 20
+#' K <- replicate(5, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
+#' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
+#' print(typeof(LR(K, mu = 0, sigma = 1, lambda = .1)) == "closure")
+#'
+#' @references Reid, S., Taylor, J., & Tibshirani, R. (2018). A General
+#' Framework for Estimation and Inference From Clusters of Features. Journal
+#' of the American Statistical Association, 113(521), 280–293.
+#'
+#' @export
 LR <- function(K, mu = 0, sigma = 1, lambda = 1, tol = 1e-6, n_iter = 1e+4) {
   if (is.list(K)) {
     Ksum <- Reduce(`+`, K)
@@ -31,6 +54,27 @@ LR <- function(K, mu = 0, sigma = 1, lambda = 1, tol = 1e-6, n_iter = 1e+4) {
   return(statistic)
 }
 
+#' 
+#'
+#'
+#' @param K a single or a list of kernel similarity matrices.
+#' @param mu marginal mean of the response Y
+#' @param sigma standard deviation of the response
+#'
+#' @return
+#'
+#' @examples
+#' n <- 30
+#' p <- 20
+#' K <- replicate(5, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
+#' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
+#' print(typeof(pcaLR(K, mu = 0, sigma = 1)) == "closure")
+#'
+#' @references Rosipal, R., Girolami, M., Trejo, L. J., & Cichocki, A. (2001).
+#' Kernel PCA for feature extraction and de-noising in nonlinear regression.
+#' Neural Computing and Applications, 10(3), 231–243.
+#'
+#' @export
 pcaLR <- function(K, mu = 0, sigma = 1) {
   if (is.list(K)) {
     Ksum <- Reduce(`+`, K)
