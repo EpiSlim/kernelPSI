@@ -1,13 +1,32 @@
+#' generates a closure for the computation of the likelihood ratio statistic
+#' for the ridge prototype.
 #'
+#' The main inspiration for the kernel ridge prototype is the prototype concept
+#' developed in Reid (2018, see references). A prototype is a synethic scalar
+#' variable that aggregates the effect of a set of variables in the outcome.
+#' Here, we extend this concept to kernels, where the prototype is the
+#' prediction of ridge regression with the selected kernels. In this function,
+#' we implement a likelihood ratio (LR) statistic to test for the effect of the
+#' the prototype on the outcome Y.
 #'
-#' @param K a single or a list of kernel similarity matrices.
+#' To maximize the likelihood objective function, we implement in the output
+#' closure a Newton-Raphson algorithm that determines the maxmimum for each
+#' input vector Y.
+#'
+#' For our post-selection inference framework, The output closure is used to
+#' compute the test statistics for both the replicates and the original outcome
+#' in order to derive empirical \eqn{p}-values.
+#'
+#' @param K a single or a list of selected kernel similarity matrices.
 #' @param mu mean of the response Y
 #' @param sigma standard deviation of the response
-#' @param lambda
-#' @param tol
-#' @param n_iter
+#' @param lambda regularization parameter for the ridge prototype
+#' @param tol convergence tolerance used a stopping criterion for the Newton-
+#' Raphson algorithm
+#' @param n_iter maximum number of iterations for the Newton-Raphson algorithm
 #'
-#' @return
+#' @return a closure for the calcuation of the LR statistic for the ridge
+#' prototype
 #'
 #' @examples
 #' n <- 30
@@ -19,6 +38,10 @@
 #' @references Reid, S., Taylor, J., & Tibshirani, R. (2018). A General
 #' Framework for Estimation and Inference From Clusters of Features. Journal
 #' of the American Statistical Association, 113(521), 280–293.
+#'
+#' @family prototype
+#'
+#' @seealso \code{\link{pcaLR}}
 #'
 #' @export
 LR <- function(K, mu = 0, sigma = 1, lambda = 1, tol = 1e-6, n_iter = 1e+4) {
@@ -54,14 +77,21 @@ LR <- function(K, mu = 0, sigma = 1, lambda = 1, tol = 1e-6, n_iter = 1e+4) {
   return(statistic)
 }
 
-#' 
+#' generates a closure for the computation of the likelihood ratio statistic
+#' for the kernel PCA prototype.
 #'
+#' This function implements the same prototype statistics in the
+#' \code{\link{LR}} function, but for kernel principal component regression
+#' (see reference). In our simulations, we observed that this method
+#' underperforms the ridge prototype. The main benefit of this approach is the
+#' possibility of exact post-selection without the need for replicates sampling.
 #'
-#' @param K a single or a list of kernel similarity matrices.
+#' @param K a single or a list of selected kernel similarity matrices.
 #' @param mu marginal mean of the response Y
 #' @param sigma standard deviation of the response
 #'
-#' @return
+#' @return a closure for the calcuation of the LR statistic for the kernel
+#' PCA prototype
 #'
 #' @examples
 #' n <- 30
@@ -73,6 +103,8 @@ LR <- function(K, mu = 0, sigma = 1, lambda = 1, tol = 1e-6, n_iter = 1e+4) {
 #' @references Rosipal, R., Girolami, M., Trejo, L. J., & Cichocki, A. (2001).
 #' Kernel PCA for feature extraction and de-noising in nonlinear regression.
 #' Neural Computing and Applications, 10(3), 231–243.
+#'
+#' @family prototype
 #'
 #' @export
 pcaLR <- function(K, mu = 0, sigma = 1) {
