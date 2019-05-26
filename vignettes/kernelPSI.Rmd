@@ -1,10 +1,10 @@
 ---
-title: "Vignette Title"
-author: "Vignette Author"
+title: "kernelPSI: a Post-Selection Inference Framework for Nonlinear Variable Selection"
+author: "Lotfi Slim"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{kernelPSI: a Post-Selection Inference Framework for Nonlinear Variable Selection}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,50 +16,80 @@ knitr::opts_chunk$set(
 )
 ```
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+<style>
+body {
+text-align: justify}
+</style>
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+In this vignette, we illustrate on a synthetic dataset how to perform post-selection inference for a set of kernels using our R package **kernelPSI**. The kernels are selected in a forward fashion according to quadratic kernel association scores, leading to the modelisation of the selection event as a set of quadratic constraints. For valid inferene, we need to correct for the bias introduced by the prior selection of the kernels. Determining the exact post-selection distribution of our test statistics under the selection event was impossible. To overcome that, we use sampling in order to derive empirical $p$-values. 
 
-## Vignette Info
+## Simulation
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+We first start by giving the setup for our simulation. We associate $10$ gaussian kernels to $10$ independent groups of variables of size $5$ each. Within each group, the variables are drawn from a multivariate normal distribution with mean $0$ and a correlation matrix $V_{ij} = \rho^{\lvert i-j\rvert}$, where $\rho = 0.6$ and $i,j\in[1\mathrel{{.}\,{.}} 5]$. The dataset we consider here consists of $100$ independent samples. 
 
-## Styles
+```{r}
+require("MASS")
 
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+n_kernels <- 10
+size_kernels <- 5
 
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+n <- 100
+rho <- 0.6
+corr <- outer(seq_len(size_kernels), seq_len(size_kernels),
+              function(i, j) return(rho^(abs(i-j))))
+X <- replicate(n_kernels,
+               mvrnorm(n, mu = rep(0, size_kernels), Sigma = corr),
+               simplify = FALSE)
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
-
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+The kernels gaussian. We use centerd kernels
+```{r}
+require("kernlab")
+K <- replicate(n_kernels, rbfdot(sigma = 1 / size_kernels))
+Kmat <- sapply(seq_len(n_kernels),
+               function(i) {kMatrix <- kernelMatrix(K[[i]], X[[i]]); 
+               return(as.kernelMatrix(kMatrix, center = TRUE))},
+               simplify = FALSE)
 ```
 
-Also a quote using `>`:
+simulation model
+```{r}
+m_kernels <- 3
+theta <- 0.1
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+Ksum <- Reduce(`+`, Kmat[seq_len(m_kernels)])
+decompK <- eigen(Ksum)
+
+Y <- as.matrix(theta * decompK$values[1] * decompK$vectors[, 1] + rnorm(n), ncol = 1)
+Lmat <- kernelMatrix(new("vanillakernel"), Y)
+```
+
+## Kernel selection
+```{r}
+require("kernelPSI")
+
+candidate_kernels <- 3
+selectFOHSIC <- FOHSIC(Kmat, Lmat, mKernels = candidate_kernels)
+constraintFO <- forwardQ(Kmat, selectFOHSIC)
+```
+
+```{r}
+selectAHSIC <- adaFOHSIC(Kmat, Lmat)
+adaFO <- adaQ(Kmat, selectAHSIC[["selection"]], selectAHSIC[["n"]])
+adaS <- selectAHSIC$selection[seq_len(selectAHSIC$n)] # indices of selected kernels
+```
+
+## Inference
+```{r}
+n_replicates <- 5000
+burn_in <- 1000
+
+kernelPSI(Y, K_select = Kmat[selectFOHSIC], constraintFO, 
+          n_replicates = n_replicates, burn_in = burn_in)
+```
+
+```{r}
+kernelPSI(Y, K_select = Kmat[adaS], constraintFO, 
+          n_replicates = n_replicates, burn_in = burn_in)
+```
+

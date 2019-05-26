@@ -20,7 +20,7 @@ PCA prototype
 }
 \description{
 This function implements the same prototype statistics in the
-\code{\link{LR}} function, but for kernel principal component regression
+\code{\link{ridgeLR}} function, but for kernel principal component regression
 (see reference). In our simulations, we observed that this method
 underperforms the ridge prototype. The main benefit of this approach is the
 possibility of exact post-selection without the need for replicates sampling.
@@ -39,6 +39,6 @@ Kernel PCA for feature extraction and de-noising in nonlinear regression.
 Neural Computing and Applications, 10(3), 231–243.
 }
 \seealso{
-Other prototype: \code{\link{LR}}
+Other prototype: \code{\link{ridgeLR}}
 }
 \concept{prototype}

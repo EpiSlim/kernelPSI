@@ -33,7 +33,7 @@
 #' p <- 20
 #' K <- replicate(5, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
 #' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
-#' print(typeof(LR(K, mu = 0, sigma = 1, lambda = .1)) == "closure")
+#' print(typeof(ridgeLR(K, mu = 0, sigma = 1, lambda = .1)) == "closure")
 #'
 #' @references Reid, S., Taylor, J., & Tibshirani, R. (2018). A General
 #' Framework for Estimation and Inference From Clusters of Features. Journal
@@ -44,7 +44,7 @@
 #' @seealso \code{\link{pcaLR}}
 #'
 #' @export
-LR <- function(K, mu = 0, sigma = 1, lambda = 1, tol = 1e-6, n_iter = 1e+4) {
+ridgeLR <- function(K, mu = 0, sigma = 1, lambda = 1, tol = 1e-6, n_iter = 1e+4) {
   if (is.list(K)) {
     Ksum <- Reduce(`+`, K)
   } else {
@@ -55,21 +55,21 @@ LR <- function(K, mu = 0, sigma = 1, lambda = 1, tol = 1e-6, n_iter = 1e+4) {
   eigsH <- decompK$values / (decompK$values + lambda)
   H <- decompK$vectors %*% diag(eigsH) %*% t(decompK$vectors)
 
-  statistic <- function(Y) {
+  statistic <- function(Z) {
     theta <- 0.1
     gap <- tol + 1
     iter <- 0
 
     while (abs(gap) > tol && iter < n_iter) {
-      gap <- (-sum(eigsH / (1 - theta * eigsH)) + drop(t(Y - mu) %*% H %*% Y) / sigma^2 -
-             theta * drop(t(Y) %*% H %*% H %*% Y) / sigma^2) /
-             (-sum(eigsH^2 / (1 - theta * eigsH)^2) - drop(t(Y) %*% H %*% H %*% Y) / (sigma^2))
+      gap <- (-sum(eigsH / (1 - theta * eigsH)) + drop(t(Z - mu) %*% H %*% Z) / sigma^2 -
+             theta * drop(t(Z) %*% H %*% H %*% Z) / sigma^2) /
+             (-sum(eigsH^2 / (1 - theta * eigsH)^2) - drop(t(Z) %*% H %*% H %*% Z) / (sigma^2))
       theta <- theta - gap
       iter <- iter + 1
     }
 
-    R <- 2 * sum(log(1 - theta * eigsH)) + 2 * theta * drop(t(Y - mu) %*% H %*% Y) / sigma^2 -
-         theta^2 * drop(t(Y) %*% H %*% H %*% Y) / sigma^2
+    R <- 2 * sum(log(1 - theta * eigsH)) + 2 * theta * drop(t(Z - mu) %*% H %*% Z) / sigma^2 -
+         theta^2 * drop(t(Z) %*% H %*% H %*% Z) / sigma^2
 
     return(R)
   }
@@ -81,7 +81,7 @@ LR <- function(K, mu = 0, sigma = 1, lambda = 1, tol = 1e-6, n_iter = 1e+4) {
 #' for the kernel PCA prototype.
 #'
 #' This function implements the same prototype statistics in the
-#' \code{\link{LR}} function, but for kernel principal component regression
+#' \code{\link{ridgeLR}} function, but for kernel principal component regression
 #' (see reference). In our simulations, we observed that this method
 #' underperforms the ridge prototype. The main benefit of this approach is the
 #' possibility of exact post-selection without the need for replicates sampling.
@@ -122,14 +122,96 @@ pcaLR <- function(K, mu = 0, sigma = 1) {
   H <- Krot %*% pracma::pinv(Krot)
   M <- sum(eigen(H, symmetric = TRUE, only.values = TRUE)[["values"]] > 0.5) # only possible eigenvalues: 0 or 1
 
-  statistic <- function(Y) {
-    roots <- Re(polyroot(c(- M + drop(t(Y - mu) %*% H %*% Y) / sigma^2, - drop(t(2 * Y - mu) %*% H %*% Y) / sigma^2,
-                         drop(t(Y) %*% H %*% Y) / sigma^2)))
+  statistic <- function(Z) {
+    roots <- Re(polyroot(c(- M + drop(t(Z - mu) %*% H %*% Z) / sigma^2, - drop(t(2 * Z - mu) %*% H %*% Z) / sigma^2,
+                         drop(t(Z) %*% H %*% Z) / sigma^2)))
     roots <- roots[roots < 1, drop  = FALSE]
     R <- max(sapply(roots,
-                        function(r) 2 * M * log(1 - r) + 2 * r * drop(t(Y - mu) %*% H %*% Y) / sigma^2 -
-                        r^2 * drop(t(Y) %*% H %*% Y)/ sigma^2))
+                        function(r) 2 * M * log(1 - r) + 2 * r * drop(t(Z - mu) %*% H %*% Z) / sigma^2 -
+                        r^2 * drop(t(Z) %*% H %*% Z)/ sigma^2))
 
     return(R)
   }
 }
+
+
+#' computes a valid significance value for the effect of the selected kernels 
+#' on the outcome
+#'
+#' In this function, we compute an empirical \eqn{p}-value for the effect of a
+#' subset of kernels on the outcome. A number of statistics are supported in 
+#' this function : ridge regression, kernel PCA and the HSIC criterion. The 
+#' \eqn{p}-values are determined by comparing the statistic of the original 
+#' response vector to those of the replicates. We use the \code{\link{sampleH}}
+#' function to sample replicates of the response in the acceptance region of 
+#' the selection event. 
+#' 
+#' For valid inference on hundreds of samples, we recommend setting the number 
+#' of replicates to \eqn{50000} and the number of burn-in iterations to 
+#' \eqn{10000}. These ranges are to be increased for higher sample sizes. 
+#'
+#' @param Y the response vector
+#' @param K_select list of selected kernel
+#' @param constraints list of quadratic matrices modeling the selection of the 
+#' kernels in \code{K_select}
+#' @param method test statistic. Must be one of the following: \code{ridge} for
+#' log-likelihood ratio for ridge regression, \code{pca} for log-likelihood for
+#' kernel PCA, \code{hsic} for HSIC measures, or \code{all} to obtain 
+#' significance values for all three former methods. 
+#' @param mu mean of the response 
+#' @param sigma standard deviation of the response
+#' @param lambda regularization parameter for ridge regression.
+#' @param n_replicates number of replicates for the hit-and-run sampler in 
+#' \code{\link{sampleH}}
+#' @param burn_in number of burn_in iteration in \code{\link{sampleH}}
+#' 
+#' @return $p$-values for the chosen methods
+#'
+#' @examples
+#' n <- 30
+#' p <- 20
+#' K <- replicate(5, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
+#' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
+#' Y <- rnorm(n)
+#' L <- Y %*% t(Y)
+#' selectK <- FOHSIC(K, L, mKernels = 2)
+#' constraintFO <- forwardQ(K, selectK)
+#' kernelPSI(Y, K[selectK], constraintFO, method = "ridge")
+#'
+#' @export
+kernelPSI <- function(Y, K_select, constraints, method = "all", 
+                      mu = 0, sigma = 1, lambda = 1, 
+                      n_replicates = 5000, burn_in = 1000){
+  
+  Y <- drop(Y)
+  
+  samples <- sampleH(constraints, Y,
+                     n_replicates = n_replicates, burn_in = burn_in,
+                     mu = mu, sigma = sigma)
+  
+  pvalues <- list()
+  
+  if ((method == "all") | ("ridge" %in% method)){
+    newtonR <- ridgeLR(K_select, mu = mu, sigma = sigma, lambda = lambda)
+    sampleR <- newtonR(Y)
+    distR <- apply(samples, 2, newtonR)
+    pvalues[["ridge"]] <- sum(distR > sampleR) / (dim(samples)[2]) 
+  }
+  
+  if ((method == "all") | ("pca" %in% method)){
+    pcaR <- pcaLR(K_select, mu = 0)
+    sampleR <- pcaR(Y)
+    distR <- apply(samples, 2, pcaR)
+    pvalues[["pca"]] <- sum(distR > sampleR) / (dim(samples)[2])
+  }
+  
+  if ((method == "all") | ("hsic" %in% method)){
+    selectQQ <- quadHSIC(Reduce(`+`, K_select))
+    sampleR <- drop(Y %*% selectQQ %*% Y)
+    distR <- apply(samples, 2, function(s) return(s %*% selectQQ %*% s))
+    pvalues[["hsic"]] <- sum(distR > sampleR) / (dim(samples)[2])
+  }
+  
+  return(pvalues)
+  
+} 

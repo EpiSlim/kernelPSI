@@ -23,7 +23,8 @@ Imports:
     lmtest
 Suggests: bindata,
     knitr,
-    rmarkdown
+    rmarkdown,
+    MASS
 Encoding: UTF-8
 LinkingTo: Rcpp, RcppArmadillo
 VignetteBuilder: knitr

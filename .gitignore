@@ -8,3 +8,5 @@ src/*.dll
 inst/doc
 .Rbuildignore
 kernelPSI.Rproj
+doc
+Meta
