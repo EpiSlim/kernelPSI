@@ -4,7 +4,7 @@
 #' adaptively selects a subset of kernels in a forward fashion.
 #'
 #' This function is similar to the \code{\link{FOHSIC}} function. The only
-#' difference lies in the adpative selection of the number of causal kernels.
+#' difference lies in the adaptive selection of the number of causal kernels.
 #' First, similarly to \code{\link{FOHSIC}}, the order of selection of the
 #' \eqn{n} kernels in \code{K} is determined, and then, the size of the subset
 #' of ordered kernels is chosen. The size is chosen as to maximize the overall
@@ -32,7 +32,7 @@ adaFOHSIC <- function(K, L) {
     .Call(`_kernelPSI_adaFOHSIC`, K, L)
 }
 
-#' models the forward selection of the kernels for the adpative variant
+#' models the forward selection of the kernels for the adaptive variant
 #'
 #' Similarly to the fixed variant, the adaptive selection of the
 #' kernels in a forward fashion can also be modeled with a set of
@@ -72,7 +72,7 @@ adaQ <- function(K, select, n) {
 #' selects a fixed number of kernels which are most associated with the
 #' outcome kernel.
 #'
-#' This function implements a foward algorithm for kernel selection. In the
+#' This function implements a forward algorithm for kernel selection. In the
 #' first step, the kernel which maximizes the HSIC measure with the outcome
 #' kernel \code{L} is selected. In the subsequent iterations, the kernel which,
 #' combined with the selected kernels maximizes the HSIC measure is selected.
@@ -115,7 +115,7 @@ FOHSIC <- function(K, L, mKernels = 1L) {
 #' list of matrices where the order is identical to the order of selection
 #' of the kernels. The matrices are computed such the associated constraint is
 #' nonnegative. For a length \eqn{n} of the list K, the total number of
-#' constraints is \eqn{n - 1}. 
+#' constraints is \eqn{n - 1}.
 #'
 #' @param K list kernel similarity matrices
 #' @param select integer vector containing the indices of the selected kernels
@@ -134,9 +134,9 @@ forwardQ <- function(K, select) {
     .Call(`_kernelPSI_forwardQ`, K, select)
 }
 
-#' Computes the HSIC cirterion for two given kernels
+#' Computes the HSIC criterion for two given kernels
 #'
-#' The Hilbert-Schmidt Independence Criterion (HSIC) is a measure of indepedence
+#' The Hilbert-Schmidt Independence Criterion (HSIC) is a measure of independence
 #' between two random variables. If characteristic kernels are used for both
 #' variables, the HSIC is zero iff the variables are independent. In this
 #' function, we implement an unbiased estimator for the HSIC measure. Specifically,
@@ -159,7 +159,7 @@ forwardQ <- function(K, select) {
 #' X <- matrix(rnorm(n*p), nrow = n, ncol = p)
 #' Y <- matrix(rnorm(n*p), nrow = n, ncol = p)
 #' K <-  X %*% t(X) / p
-#' L <-  Y %*% t(Y) / p 
+#' L <-  Y %*% t(Y) / p
 #' uHSIC <- HSIC(K, L)
 #'
 #' @export
@@ -215,7 +215,7 @@ quadHSIC <- function(K) {
 #' @param n_replicates total number of replicates to be generated
 #' @param mu mean of the outcome
 #' @param sigma standard deviation of the outcome
-#' @param n_iter maxmimum number of rejections for the parameter \eqn{\lambda}
+#' @param n_iter maximum number of rejections for the parameter \eqn{\lambda}
 #' in a single iteration
 #' @param burn_in number of burn-in iterations
 #'
@@ -224,7 +224,7 @@ quadHSIC <- function(K) {
 #'
 #' @references Berbee, H. C. P., Boender, C. G. E., Rinnooy Ran, A. H. G.,
 #' Scheffer, C. L., Smith, R. L., & Telgen, J. (1987). Hit-and-run algorithms
-#' for the identification of nonredundant linear inequalities. Mathematical
+#' for the identification of non-redundant linear inequalities. Mathematical
 #' Programming, 37(2), 184–207.
 #'
 #' @references Belisle, C. J. P., Romeijn, H. E., & Smith, R. L. (2016).
@@ -236,8 +236,8 @@ quadHSIC <- function(K) {
 #' p <- 20
 #' K <- replicate(5, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
 #' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
-#' Y <- rnorm(n) 
-#' L <- Y %*% t(Y)  
+#' Y <- rnorm(n)
+#' L <- Y %*% t(Y)
 #' selection <- FOHSIC(K, L, 2)
 #' constraintQ <- forwardQ(K, select = selection)
 #' samples <- sampleH(A = constraintQ, initial = Y,

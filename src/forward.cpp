@@ -8,7 +8,7 @@ using namespace Rcpp;
 //' selects a fixed number of kernels which are most associated with the
 //' outcome kernel.
 //'
-//' This function implements a foward algorithm for kernel selection. In the
+//' This function implements a forward algorithm for kernel selection. In the
 //' first step, the kernel which maximizes the HSIC measure with the outcome
 //' kernel \code{L} is selected. In the subsequent iterations, the kernel which,
 //' combined with the selected kernels maximizes the HSIC measure is selected.
@@ -66,7 +66,7 @@ IntegerVector FOHSIC(arma::field<arma::mat> K, arma::mat L, int mKernels = 1)
 //' list of matrices where the order is identical to the order of selection
 //' of the kernels. The matrices are computed such the associated constraint is
 //' nonnegative. For a length \eqn{n} of the list K, the total number of
-//' constraints is \eqn{n - 1}. 
+//' constraints is \eqn{n - 1}.
 //'
 //' @param K list kernel similarity matrices
 //' @param select integer vector containing the indices of the selected kernels

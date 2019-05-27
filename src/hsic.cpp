@@ -4,9 +4,9 @@ using namespace Rcpp;
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
-//' Computes the HSIC cirterion for two given kernels
+//' Computes the HSIC criterion for two given kernels
 //'
-//' The Hilbert-Schmidt Independence Criterion (HSIC) is a measure of indepedence
+//' The Hilbert-Schmidt Independence Criterion (HSIC) is a measure of independence
 //' between two random variables. If characteristic kernels are used for both
 //' variables, the HSIC is zero iff the variables are independent. In this
 //' function, we implement an unbiased estimator for the HSIC measure. Specifically,
@@ -29,7 +29,7 @@ using namespace Rcpp;
 //' X <- matrix(rnorm(n*p), nrow = n, ncol = p)
 //' Y <- matrix(rnorm(n*p), nrow = n, ncol = p)
 //' K <-  X %*% t(X) / p
-//' L <-  Y %*% t(Y) / p 
+//' L <-  Y %*% t(Y) / p
 //' uHSIC <- HSIC(K, L)
 //'
 //' @export

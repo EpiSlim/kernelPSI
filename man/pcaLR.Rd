@@ -15,7 +15,7 @@ pcaLR(K, mu = 0, sigma = 1)
 \item{sigma}{standard deviation of the response}
 }
 \value{
-a closure for the calcuation of the LR statistic for the kernel
+a closure for the calculation of the LR statistic for the kernel
 PCA prototype
 }
 \description{

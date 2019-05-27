@@ -13,14 +13,14 @@ quadHSIC(K)
 the matrix of the HSIC estimator quadratic form
 }
 \description{
-For a linear kernel of the outcome \eqn{L = Y^\top Y}, the unbiased HSIC 
+For a linear kernel of the outcome \eqn{L = Y^\top Y}, the unbiased HSIC
 estimator implemented in \code{\link{HSIC}} can be expressed as a quadratic
-form of the outcome \eqn{Y} i.e. \eqn{HSIC(K, L) = Y^\top Q(K) Y}. Here, 
+form of the outcome \eqn{Y} i.e. \eqn{HSIC(K, L) = Y^\top Q(K) Y}. Here,
 the matrix \eqn{Q} only depends on the kernel similarity matrix \eqn{K}.
 }
 \examples{
 n <- 50
-p <- 20 
+p <- 20
 X <- matrix(rnorm(n*p), nrow = n, ncol = p)
 K <-  X \%*\% t(X) / p
 Q <- quadHSIC(K)

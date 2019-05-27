@@ -23,12 +23,12 @@ Raphson algorithm}
 \item{n_iter}{maximum number of iterations for the Newton-Raphson algorithm}
 }
 \value{
-a closure for the calcuation of the LR statistic for the ridge
+a closure for the calculation of the LR statistic for the ridge
 prototype
 }
 \description{
 The main inspiration for the kernel ridge prototype is the prototype concept
-developed in Reid (2018, see references). A prototype is a synethic scalar
+developed in Reid (2018, see references). A prototype is a synthetic scalar
 variable that aggregates the effect of a set of variables in the outcome.
 Here, we extend this concept to kernels, where the prototype is the
 prediction of ridge regression with the selected kernels. In this function,
@@ -37,7 +37,7 @@ the prototype on the outcome Y.
 }
 \details{
 To maximize the likelihood objective function, we implement in the output
-closure a Newton-Raphson algorithm that determines the maxmimum for each
+closure a Newton-Raphson algorithm that determines the maximum for each
 input vector Y.
 
 For our post-selection inference framework, The output closure is used to

@@ -18,7 +18,7 @@ FOHSIC(K, L, mKernels = 1L)
 an integer vector containing the indices of the selected kernels
 }
 \description{
-This function implements a foward algorithm for kernel selection. In the
+This function implements a forward algorithm for kernel selection. In the
 first step, the kernel which maximizes the HSIC measure with the outcome
 kernel \code{L} is selected. In the subsequent iterations, the kernel which,
 combined with the selected kernels maximizes the HSIC measure is selected.

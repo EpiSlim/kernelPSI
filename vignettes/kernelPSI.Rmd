@@ -1,4 +1,4 @@
----
+beforehand---
 title: "kernelPSI: a Post-Selection Inference Framework for Nonlinear Variable Selection"
 author: "Lotfi Slim"
 date: "`r Sys.Date()`"
@@ -21,11 +21,11 @@ body {
 text-align: justify}
 </style>
 
-In this vignette, we illustrate on a synthetic dataset how to perform post-selection inference (PSI) for a set of kernels using our R package **kernelPSI**. The kernels are selected in a forward fashion according to quadratic kernel association scores, leading to the modelisation of the selection event as a set of quadratic constraints. For valid inferene, we need to correct for the bias introduced by the prior selection of the kernels. Determining the exact post-selection distribution of our test statistics under the selection event was impossible. To overcome that, we use sampling in order to derive empirical $p$-values. 
+In this vignette, we illustrate on a synthetic dataset how to perform post-selection inference (PSI) for a set of kernels using our R package **kernelPSI**. The kernels are selected in a forward fashion according to quadratic kernel association scores, leading to the modeling of the selection event as a set of quadratic constraints. For valid inference, we need to correct for the bias introduced by the prior selection of the kernels. Determining the exact post-selection distribution of our test statistics under the selection event was impossible. To overcome that, we use sampling in order to derive empirical $p$-values.
 
 ## Simulation
 
-We first start by giving the setup for our simulation. We associate $10$ gaussian kernels to $10$ independent groups of variables of size $5$ each. Within each group, the variables are drawn from a multivariate normal distribution with mean $0$ and a correlation matrix $V_{ij} = \rho^{\lvert i-j\rvert}$, where $\rho = 0.6$ and $i,j\in[1\mathrel{{.}\,{.}} 5]$. The dataset we consider here consists of $100$ independent samples. 
+We first start by giving the setup for our simulation. We associate $10$ gaussian kernels to $10$ independent groups of variables of size $5$ each. Within each group, the variables are drawn from a multivariate normal distribution with mean $0$ and a correlation matrix $V_{ij} = \rho^{\lvert i-j\rvert}$, where $\rho = 0.6$ and $i,j\in[1\mathrel{{.}\,{.}} 5]$. The dataset we consider here consists of $100$ independent samples.
 
 ```{r, echo=FALSE}
 set.seed(12)
@@ -51,12 +51,12 @@ To each group, we associate a local gaussian kernel $K$ of variance $\sigma^2 = 
 require("kernlab")
 K <- replicate(n_kernels, rbfdot(sigma = 1 / size_kernels))
 Kmat <- sapply(seq_len(n_kernels),
-               function(i) {kMatrix <- kernelMatrix(K[[i]], X[[i]]); 
+               function(i) {kMatrix <- kernelMatrix(K[[i]], X[[i]]);
                return(as.kernelMatrix(kMatrix, center = TRUE))},
                simplify = FALSE)
 ```
 
-We select the first three kernels as causal kernels, and simulate the outcome $Y$ in the following way: $Y\sim 0.1 * U + \epsilon$. $U$ is the first eigenvector of the similariy matrix of the sum kernel of the first three kernel and $\epsilon$ is a reduced gaussian random error. For the outcome, we consider the linear kernel.   
+We select the first three kernels as causal kernels, and simulate the outcome $Y$ in the following way: $Y\sim 0.1 * U + \epsilon$. $U$ is the first eigenvector of the similarity matrix of the sum kernel of the first three kernel and $\epsilon$ is a reduced gaussian random error. For the outcome, we consider the linear kernel.   
 ```{r}
 m_kernels <- 3
 theta <- 0.1
@@ -77,7 +77,7 @@ candidate_kernels <- 3
 selectFOHSIC <- FOHSIC(Kmat, Lmat, mKernels = candidate_kernels)
 constraintFO <- forwardQ(Kmat, selectFOHSIC)
 ```
-If the number of causal kernels is not available beforhand, we resort to the adaptive version:  
+If the number of causal kernels is not available beforehand, we resort to the adaptive version:  
 ```{r}
 selectAHSIC <- adaFOHSIC(Kmat, Lmat)
 adaFO <- adaQ(Kmat, selectAHSIC[["selection"]], selectAHSIC[["n"]])
@@ -85,18 +85,17 @@ adaS <- selectAHSIC$selection[seq_len(selectAHSIC$n)] # indices of selected kern
 ```
 
 ## Inference
-Finally, using the obtained constraints, we can derive PSI significance values for three statistics: the log-likelihood ratio for the ridge prototype, the log-likelihood ratio for the kernel PCA prototype and the HSIC score. The $p$-values are computed by comparing the statistics of the original response to those of replicates sampled within the acceptance region of the selection event. Most often, because of the difference in their statistical power, the methods yield different $p$-values. 
+Finally, using the obtained constraints, we can derive PSI significance values for three statistics: the log-likelihood ratio for the ridge prototype, the log-likelihood ratio for the kernel PCA prototype and the HSIC score. The $p$-values are computed by comparing the statistics of the original response to those of replicates sampled within the acceptance region of the selection event. Most often, because of the difference in their statistical power, the methods yield different $p$-values.
 
 ```{r}
 n_replicates <- 5000 # To be increased for real use cases
 burn_in <- 1000
 
 # Fixed variant ------------------
-kernelPSI(Y, K_select = Kmat[selectFOHSIC], constraintFO, 
+kernelPSI(Y, K_select = Kmat[selectFOHSIC], constraintFO,
           n_replicates = n_replicates, burn_in = burn_in)
 
 # Adaptive variant ------------------
-kernelPSI(Y, K_select = Kmat[adaS], constraintFO, 
+kernelPSI(Y, K_select = Kmat[adaS], constraintFO,
           n_replicates = n_replicates, burn_in = burn_in)
 ```
-

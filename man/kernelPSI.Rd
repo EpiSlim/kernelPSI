@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistic.R
 \name{kernelPSI}
 \alias{kernelPSI}
-\title{computes a valid significance value for the effect of the selected kernels 
+\title{computes a valid significance value for the effect of the selected kernels
 on the outcome}
 \usage{
 kernelPSI(Y, K_select, constraints, method = "all", mu = 0,
@@ -13,12 +13,12 @@ kernelPSI(Y, K_select, constraints, method = "all", mu = 0,
 
 \item{K_select}{list of selected kernel}
 
-\item{constraints}{list of quadratic matrices modeling the selection of the 
+\item{constraints}{list of quadratic matrices modeling the selection of the
 kernels in \code{K_select}}
 
 \item{method}{test statistic. Must be one of the following: \code{ridge} for
 log-likelihood ratio for ridge regression, \code{pca} for log-likelihood for
-kernel PCA, \code{hsic} for HSIC measures, or \code{all} to obtain 
+kernel PCA, \code{hsic} for HSIC measures, or \code{all} to obtain
 significance values for all three former methods.}
 
 \item{mu}{mean of the response}
@@ -27,7 +27,7 @@ significance values for all three former methods.}
 
 \item{lambda}{regularization parameter for ridge regression.}
 
-\item{n_replicates}{number of replicates for the hit-and-run sampler in 
+\item{n_replicates}{number of replicates for the hit-and-run sampler in
 \code{\link{sampleH}}}
 
 \item{burn_in}{number of burn_in iteration in \code{\link{sampleH}}}
@@ -37,16 +37,16 @@ $p$-values for the chosen methods
 }
 \description{
 In this function, we compute an empirical \eqn{p}-value for the effect of a
-subset of kernels on the outcome. A number of statistics are supported in 
-this function : ridge regression, kernel PCA and the HSIC criterion. The 
-\eqn{p}-values are determined by comparing the statistic of the original 
+subset of kernels on the outcome. A number of statistics are supported in
+this function : ridge regression, kernel PCA and the HSIC criterion. The
+\eqn{p}-values are determined by comparing the statistic of the original
 response vector to those of the replicates. We use the \code{\link{sampleH}}
-function to sample replicates of the response in the acceptance region of 
+function to sample replicates of the response in the acceptance region of
 the selection event.
 }
 \details{
-For valid inference on hundreds of samples, we recommend setting the number 
-of replicates to \eqn{50000} and the number of burn-in iterations to 
+For valid inference on hundreds of samples, we recommend setting the number
+of replicates to \eqn{50000} and the number of burn-in iterations to
 \eqn{10000}. These ranges are to be increased for higher sample sizes.
 }
 \examples{

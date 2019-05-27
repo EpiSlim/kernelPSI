@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{HSIC}
 \alias{HSIC}
-\title{Computes the HSIC cirterion for two given kernels}
+\title{Computes the HSIC criterion for two given kernels}
 \usage{
 HSIC(K, L)
 }
@@ -15,26 +15,26 @@ HSIC(K, L)
 an unbiased estimate of the HSIC measure.
 }
 \description{
-The Hilbert-Schmidt Independence Criterion (HSIC) is a measure of indepedence 
+The Hilbert-Schmidt Independence Criterion (HSIC) is a measure of independence
 between two random variables. If characteristic kernels are used for both
-variables, the HSIC is zero iff the variables are independent. In this 
-function, we implement an unbiased estimator for the HSIC measure. Specifically, 
-for two positive-definite kernels \eqn{K} and \eqn{L} and a sample size 
-\eqn{n}, the unbiased HSIC estimator is: 
+variables, the HSIC is zero iff the variables are independent. In this
+function, we implement an unbiased estimator for the HSIC measure. Specifically,
+for two positive-definite kernels \eqn{K} and \eqn{L} and a sample size
+\eqn{n}, the unbiased HSIC estimator is:
 \deqn{HSIC(K, L) = \frac{1}{n(n-3)} \left[trace(KL) + \frac{1^\top K11^\top L 1}{(n-1)(n-2)}- \frac{2}{n-2}1^\top KL\right]}
 }
 \examples{
 n <- 50
-p <- 20 
+p <- 20
 X <- matrix(rnorm(n*p), nrow = n, ncol = p)
 Y <- matrix(rnorm(n*p), nrow = n, ncol = p)
-K <-  X \%*\% t(X) / p 
-L <-  X \%*\% t(Y) / p 
+K <-  X \%*\% t(X) / p
+L <-  Y \%*\% t(Y) / p
 uHSIC <- HSIC(K, L)
 
 }
 \references{
-Song, L., Smola, A., Gretton, A., Borgwardt, K., & Bedo, J. 
-(2007). Supervised Feature Selection via Dependence Estimation. 
+Song, L., Smola, A., Gretton, A., Borgwardt, K., & Bedo, J.
+(2007). Supervised Feature Selection via Dependence Estimation.
 https://doi.org/10.1145/1273496.1273600
 }

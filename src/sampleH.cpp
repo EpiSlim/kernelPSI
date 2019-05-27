@@ -31,7 +31,7 @@ using namespace Rcpp;
 //' @param n_replicates total number of replicates to be generated
 //' @param mu mean of the outcome
 //' @param sigma standard deviation of the outcome
-//' @param n_iter maxmimum number of rejections for the parameter \eqn{\lambda}
+//' @param n_iter maximum number of rejections for the parameter \eqn{\lambda}
 //' in a single iteration
 //' @param burn_in number of burn-in iterations
 //'
@@ -40,7 +40,7 @@ using namespace Rcpp;
 //'
 //' @references Berbee, H. C. P., Boender, C. G. E., Rinnooy Ran, A. H. G.,
 //' Scheffer, C. L., Smith, R. L., & Telgen, J. (1987). Hit-and-run algorithms
-//' for the identification of nonredundant linear inequalities. Mathematical
+//' for the identification of non-redundant linear inequalities. Mathematical
 //' Programming, 37(2), 184–207.
 //'
 //' @references Belisle, C. J. P., Romeijn, H. E., & Smith, R. L. (2016).
@@ -52,8 +52,8 @@ using namespace Rcpp;
 //' p <- 20
 //' K <- replicate(5, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
 //' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
-//' Y <- rnorm(n) 
-//' L <- Y %*% t(Y)  
+//' Y <- rnorm(n)
+//' L <- Y %*% t(Y)
 //' selection <- FOHSIC(K, L, 2)
 //' constraintQ <- forwardQ(K, select = selection)
 //' samples <- sampleH(A = constraintQ, initial = Y,

@@ -8,7 +8,7 @@ using namespace Rcpp;
 //' adaptively selects a subset of kernels in a forward fashion.
 //'
 //' This function is similar to the \code{\link{FOHSIC}} function. The only
-//' difference lies in the adpative selection of the number of causal kernels.
+//' difference lies in the adaptive selection of the number of causal kernels.
 //' First, similarly to \code{\link{FOHSIC}}, the order of selection of the
 //' \eqn{n} kernels in \code{K} is determined, and then, the size of the subset
 //' of ordered kernels is chosen. The size is chosen as to maximize the overall
@@ -59,7 +59,7 @@ List adaFOHSIC(arma::field<arma::mat> K, arma::mat L)
 
 }
 
-//' models the forward selection of the kernels for the adpative variant
+//' models the forward selection of the kernels for the adaptive variant
 //'
 //' Similarly to the fixed variant, the adaptive selection of the
 //' kernels in a forward fashion can also be modeled with a set of

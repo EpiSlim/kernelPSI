@@ -21,7 +21,7 @@ to the outcome of the original dataset.}
 
 \item{sigma}{standard deviation of the outcome}
 
-\item{n_iter}{maxmimum number of rejections for the parameter \eqn{\lambda}
+\item{n_iter}{maximum number of rejections for the parameter \eqn{\lambda}
 in a single iteration}
 
 \item{burn_in}{number of burn-in iterations}
@@ -53,8 +53,8 @@ n <- 30
 p <- 20
 K <- replicate(5, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
 K <-  sapply(K, function(X) return(X \%*\% t(X) / dim(X)[2]), simplify = FALSE)
-Y <- rnorm(n) 
-L <- Y \%*\% t(Y)  
+Y <- rnorm(n)
+L <- Y \%*\% t(Y)
 selection <- FOHSIC(K, L, 2)
 constraintQ <- forwardQ(K, select = selection)
 samples <- sampleH(A = constraintQ, initial = Y,
@@ -63,7 +63,7 @@ samples <- sampleH(A = constraintQ, initial = Y,
 \references{
 Berbee, H. C. P., Boender, C. G. E., Rinnooy Ran, A. H. G.,
 Scheffer, C. L., Smith, R. L., & Telgen, J. (1987). Hit-and-run algorithms
-for the identification of nonredundant linear inequalities. Mathematical
+for the identification of non-redundant linear inequalities. Mathematical
 Programming, 37(2), 184–207.
 
 Belisle, C. J. P., Romeijn, H. E., & Smith, R. L. (2016).

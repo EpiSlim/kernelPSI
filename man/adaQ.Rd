@@ -2,18 +2,18 @@
 % Please edit documentation in R/RcppExports.R
 \name{adaQ}
 \alias{adaQ}
-\title{models the forward selection of the kernels for the adpative variant}
+\title{models the forward selection of the kernels for the adaptive variant}
 \usage{
 adaQ(K, select, n)
 }
 \arguments{
 \item{K}{list kernel similarity matrices}
 
-\item{select}{integer vector containing the order of selection of the kernels 
-in \code{K}. Typically, the \code{selection} field of the output of 
+\item{select}{integer vector containing the order of selection of the kernels
+in \code{K}. Typically, the \code{selection} field of the output of
 \code{\link{FOHSIC}}.}
 
-\item{n}{number of selected kernels. Typically, the \code{n} field of the 
+\item{n}{number of selected kernels. Typically, the \code{n} field of the
 output of \code{\link{adaFOHSIC}}.}
 }
 \value{
@@ -21,12 +21,12 @@ list of matrices modeling the quadratic constraints of the
 adaptive selection event
 }
 \description{
-Similarly to the fixed variant, the adaptive selection of the 
-kernels in a forward fashion can also be modeled with a set of 
+Similarly to the fixed variant, the adaptive selection of the
+kernels in a forward fashion can also be modeled with a set of
 quadratic constraints. The constraints for adaptive selection can be split
-into two subsets. The first subset encodes the order of selection of the 
+into two subsets. The first subset encodes the order of selection of the
 kernels, while the second subset encodes the selection of the number of the
-kernels. The two subsets are equally sized (\code{length(K) - 1}) and are 
+kernels. The two subsets are equally sized (\code{length(K) - 1}) and are
 sequentially included in the output list.
 }
 \examples{
@@ -40,6 +40,6 @@ adaS <- adaFOHSIC(K, L)
 listQ <- adaQ(K, select = adaS[["selection"]], n = adaS[["n"]])
 }
 \references{
-Loftus, J. R., & Taylor, J. E. (2015). Selective inference in 
+Loftus, J. R., & Taylor, J. E. (2015). Selective inference in
 regression models with groups of variables.
 }

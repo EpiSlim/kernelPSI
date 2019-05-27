@@ -17,11 +17,11 @@ selection of all kernels in the list \code{K} and the second item is the
 number of selected kernels.
 }
 \description{
-This function is similar to the \code{\link{FOHSIC}} function. The only 
-difference lies in the adpative selection of the number of causal kernels.
-First, similarly to \code{\link{FOHSIC}}, the order of selection of the 
+This function is similar to the \code{\link{FOHSIC}} function. The only
+difference lies in the adaptive selection of the number of causal kernels.
+First, similarly to \code{\link{FOHSIC}}, the order of selection of the
 \eqn{n} kernels in \code{K} is determined, and then, the size of the subset
-of ordered kernels is chosen. The size is chosen as to maximize the overall 
+of ordered kernels is chosen. The size is chosen as to maximize the overall
 association with the kernel L.
 }
 \examples{
