@@ -7,11 +7,11 @@ using namespace Rcpp;
 
 //' adaptively selects a subset of kernels in a forward fashion.
 //'
-//' This function is similar to the \code{\link{FOHSIC}} function. The only 
+//' This function is similar to the \code{\link{FOHSIC}} function. The only
 //' difference lies in the adpative selection of the number of causal kernels.
-//' First, similarly to \code{\link{FOHSIC}}, the order of selection of the 
+//' First, similarly to \code{\link{FOHSIC}}, the order of selection of the
 //' \eqn{n} kernels in \code{K} is determined, and then, the size of the subset
-//' of ordered kernels is chosen. The size is chosen as to maximize the overall 
+//' of ordered kernels is chosen. The size is chosen as to maximize the overall
 //' association with the kernel L.
 //'
 //' @param K list of kernel similarity matrices
@@ -19,7 +19,7 @@ using namespace Rcpp;
 //'
 //' @return a list where the the first item \code{selection} is the order of
 //' selection of all kernels in the list \code{K} and the second item is the
-//' number of selected kernels. 
+//' number of selected kernels.
 //'
 //' @examples
 //' n <- 50
@@ -61,25 +61,25 @@ List adaFOHSIC(arma::field<arma::mat> K, arma::mat L)
 
 //' models the forward selection of the kernels for the adpative variant
 //'
-//' Similarly to the fixed variant, the adaptive selection of the 
-//' kernels in a forward fashion can also be modeled with a set of 
+//' Similarly to the fixed variant, the adaptive selection of the
+//' kernels in a forward fashion can also be modeled with a set of
 //' quadratic constraints. The constraints for adaptive selection can be split
-//' into two subsets. The first subset encodes the order of selection of the 
+//' into two subsets. The first subset encodes the order of selection of the
 //' kernels, while the second subset encodes the selection of the number of the
-//' kernels. The two subsets are equally sized (\code{length(K) - 1}) and are 
-//' sequentially included in the output list. 
-//' 
+//' kernels. The two subsets are equally sized (\code{length(K) - 1}) and are
+//' sequentially included in the output list.
+//'
 //' @param K list kernel similarity matrices
-//' @param select integer vector containing the order of selection of the kernels 
-//' in \code{K}. Typically, the \code{selection} field of the output of 
-//' \code{\link{FOHSIC}}. 
-//' @param n number of selected kernels. Typically, the \code{n} field of the 
-//' output of \code{\link{adaFOHSIC}}. 
+//' @param select integer vector containing the order of selection of the kernels
+//' in \code{K}. Typically, the \code{selection} field of the output of
+//' \code{\link{FOHSIC}}.
+//' @param n number of selected kernels. Typically, the \code{n} field of the
+//' output of \code{\link{adaFOHSIC}}.
 //'
 //' @return list of matrices modeling the quadratic constraints of the
 //' adaptive selection event
-//' 
-//' @references Loftus, J. R., & Taylor, J. E. (2015). Selective inference in 
+//'
+//' @references Loftus, J. R., & Taylor, J. E. (2015). Selective inference in
 //' regression models with groups of variables.
 //'
 //' @examples

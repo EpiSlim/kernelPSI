@@ -3,11 +3,11 @@
 
 #' adaptively selects a subset of kernels in a forward fashion.
 #'
-#' This function is similar to the \code{\link{FOHSIC}} function. The only 
+#' This function is similar to the \code{\link{FOHSIC}} function. The only
 #' difference lies in the adpative selection of the number of causal kernels.
-#' First, similarly to \code{\link{FOHSIC}}, the order of selection of the 
+#' First, similarly to \code{\link{FOHSIC}}, the order of selection of the
 #' \eqn{n} kernels in \code{K} is determined, and then, the size of the subset
-#' of ordered kernels is chosen. The size is chosen as to maximize the overall 
+#' of ordered kernels is chosen. The size is chosen as to maximize the overall
 #' association with the kernel L.
 #'
 #' @param K list of kernel similarity matrices
@@ -15,7 +15,7 @@
 #'
 #' @return a list where the the first item \code{selection} is the order of
 #' selection of all kernels in the list \code{K} and the second item is the
-#' number of selected kernels. 
+#' number of selected kernels.
 #'
 #' @examples
 #' n <- 50
@@ -34,25 +34,25 @@ adaFOHSIC <- function(K, L) {
 
 #' models the forward selection of the kernels for the adpative variant
 #'
-#' Similarly to the fixed variant, the adaptive selection of the 
-#' kernels in a forward fashion can also be modeled with a set of 
+#' Similarly to the fixed variant, the adaptive selection of the
+#' kernels in a forward fashion can also be modeled with a set of
 #' quadratic constraints. The constraints for adaptive selection can be split
-#' into two subsets. The first subset encodes the order of selection of the 
+#' into two subsets. The first subset encodes the order of selection of the
 #' kernels, while the second subset encodes the selection of the number of the
-#' kernels. The two subsets are equally sized (\code{length(K) - 1}) and are 
-#' sequentially included in the output list. 
-#' 
+#' kernels. The two subsets are equally sized (\code{length(K) - 1}) and are
+#' sequentially included in the output list.
+#'
 #' @param K list kernel similarity matrices
-#' @param select integer vector containing the order of selection of the kernels 
-#' in \code{K}. Typically, the \code{selection} field of the output of 
-#' \code{\link{FOHSIC}}. 
-#' @param n number of selected kernels. Typically, the \code{n} field of the 
-#' output of \code{\link{adaFOHSIC}}. 
+#' @param select integer vector containing the order of selection of the kernels
+#' in \code{K}. Typically, the \code{selection} field of the output of
+#' \code{\link{FOHSIC}}.
+#' @param n number of selected kernels. Typically, the \code{n} field of the
+#' output of \code{\link{adaFOHSIC}}.
 #'
 #' @return list of matrices modeling the quadratic constraints of the
 #' adaptive selection event
-#' 
-#' @references Loftus, J. R., & Taylor, J. E. (2015). Selective inference in 
+#'
+#' @references Loftus, J. R., & Taylor, J. E. (2015). Selective inference in
 #' regression models with groups of variables.
 #'
 #' @examples
@@ -135,52 +135,52 @@ forwardQ <- function(K, select) {
 }
 
 #' Computes the HSIC cirterion for two given kernels
-#' 
-#' The Hilbert-Schmidt Independence Criterion (HSIC) is a measure of indepedence 
+#'
+#' The Hilbert-Schmidt Independence Criterion (HSIC) is a measure of indepedence
 #' between two random variables. If characteristic kernels are used for both
-#' variables, the HSIC is zero iff the variables are independent. In this 
-#' function, we implement an unbiased estimator for the HSIC measure. Specifically, 
-#' for two positive-definite kernels \eqn{K} and \eqn{L} and a sample size 
-#' \eqn{n}, the unbiased HSIC estimator is: 
+#' variables, the HSIC is zero iff the variables are independent. In this
+#' function, we implement an unbiased estimator for the HSIC measure. Specifically,
+#' for two positive-definite kernels \eqn{K} and \eqn{L} and a sample size
+#' \eqn{n}, the unbiased HSIC estimator is:
 #' \deqn{HSIC(K, L) = \frac{1}{n(n-3)} \left[trace(KL) + \frac{1^\top K11^\top L 1}{(n-1)(n-2)}- \frac{2}{n-2}1^\top KL\right]}
-#' 
+#'
 #' @param K first kernel similarity matrix
 #' @param L second kernel similarity matrix
-#' 
-#' @return an unbiased estimate of the HSIC measure. 
-#' 
-#' @references Song, L., Smola, A., Gretton, A., Borgwardt, K., & Bedo, J. 
-#' (2007). Supervised Feature Selection via Dependence Estimation. 
+#'
+#' @return an unbiased estimate of the HSIC measure.
+#'
+#' @references Song, L., Smola, A., Gretton, A., Borgwardt, K., & Bedo, J.
+#' (2007). Supervised Feature Selection via Dependence Estimation.
 #' https://doi.org/10.1145/1273496.1273600
-#' 
+#'
 #' @examples
 #' n <- 50
-#' p <- 20 
+#' p <- 20
 #' X <- matrix(rnorm(n*p), nrow = n, ncol = p)
 #' Y <- matrix(rnorm(n*p), nrow = n, ncol = p)
-#' K <-  X %*% t(X) / p 
-#' L <-  X %*% t(Y) / p 
+#' K <-  X %*% t(X) / p
+#' L <-  Y %*% t(Y) / p 
 #' uHSIC <- HSIC(K, L)
-#' 
+#'
 #' @export
 HSIC <- function(K, L) {
     .Call(`_kernelPSI_HSIC`, K, L)
 }
 
 #' Determines the quadratic form of the HSIC unbiased estimator
-#' 
-#' For a linear kernel of the outcome \eqn{L = Y^\top Y}, the unbiased HSIC 
+#'
+#' For a linear kernel of the outcome \eqn{L = Y^\top Y}, the unbiased HSIC
 #' estimator implemented in \code{\link{HSIC}} can be expressed as a quadratic
-#' form of the outcome \eqn{Y} i.e. \eqn{HSIC(K, L) = Y^\top Q(K) Y}. Here, 
-#' the matrix \eqn{Q} only depends on the kernel similarity matrix \eqn{K}. 
-#' 
+#' form of the outcome \eqn{Y} i.e. \eqn{HSIC(K, L) = Y^\top Q(K) Y}. Here,
+#' the matrix \eqn{Q} only depends on the kernel similarity matrix \eqn{K}.
+#'
 #' @param K kernel similarity matrix
-#' 
+#'
 #' @return the matrix of the HSIC estimator quadratic form
-#' 
+#'
 #' @examples
 #' n <- 50
-#' p <- 20 
+#' p <- 20
 #' X <- matrix(rnorm(n*p), nrow = n, ncol = p)
 #' K <-  X %*% t(X) / p
 #' Q <- quadHSIC(K)
