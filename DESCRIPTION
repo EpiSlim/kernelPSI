@@ -21,10 +21,12 @@ Imports:
     pracma,
     kernlab,
     lmtest
-Suggests: bindata,
+Suggests: 
+    bindata,
     knitr,
     rmarkdown,
-    MASS
+    MASS,
+    testthat
 Encoding: UTF-8
 LinkingTo: Rcpp, RcppArmadillo
 VignetteBuilder: knitr
