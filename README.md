@@ -15,7 +15,7 @@ kernels on the outcome.
 
 ## Installation
 
-You can install the released version of epiGWAS from
+You can install the released version of kernelPSI from
 [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
@@ -48,7 +48,7 @@ n_kernels <- 10
 m_kernels <- 3
 size_kernels <- 5
 
-theta <- .01 
+theta <- .01
 
 n <- 100
 rho <- 0.6
@@ -65,7 +65,7 @@ Kmat <- sapply(seq_len(n_kernels),
                function(i) {kMatrix <- kernelMatrix(K[[i]], X[[i]]); return(as.kernelMatrix(kMatrix, center = TRUE))},
                simplify = FALSE)
 Ksum <- Reduce(`+`, Kmat[seq_len(m_kernels)])
-decompK <- eigen(Ksum) 
+decompK <- eigen(Ksum)
 
 Y <- as.matrix(theta * decompK$values[1] * decompK$vectors[, 1] + rnorm(n), ncol = 1)
 Lmat <- kernelMatrix(new("vanillakernel"), Y)
@@ -103,12 +103,12 @@ kernelPSI(Y, K_select = Kmat[selectFOHSIC], constraintFO, method = c("ridge", "h
           n_replicates = n_replicates, burn_in = burn_in)
 #> $ridge
 #> [1] 0.953
-#> 
+#>
 #> $hsic
 #> [1] 0.504
 
 # Adaptive variant ------------------
-kernelPSI(Y, K_select = Kmat[adaS], constraintFO, method = c("pca"), 
+kernelPSI(Y, K_select = Kmat[adaS], constraintFO, method = c("pca"),
           n_replicates = n_replicates, burn_in = burn_in)
 #> $pca
 #> [1] 0.89
