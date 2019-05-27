@@ -191,21 +191,21 @@ kernelPSI <- function(Y, K_select, constraints, method = "all",
   
   pvalues <- list()
   
-  if ((method == "all") | ("ridge" %in% method)){
+  if (any(method == "all") | any("ridge" %in% method)){
     newtonR <- ridgeLR(K_select, mu = mu, sigma = sigma, lambda = lambda)
     sampleR <- newtonR(Y)
     distR <- apply(samples, 2, newtonR)
     pvalues[["ridge"]] <- sum(distR > sampleR) / (dim(samples)[2]) 
   }
   
-  if ((method == "all") | ("pca" %in% method)){
+  if (any(method == "all") | any("pca" %in% method)){
     pcaR <- pcaLR(K_select, mu = 0)
     sampleR <- pcaR(Y)
     distR <- apply(samples, 2, pcaR)
     pvalues[["pca"]] <- sum(distR > sampleR) / (dim(samples)[2])
   }
   
-  if ((method == "all") | ("hsic" %in% method)){
+  if (any(method == "all") | any("hsic" %in% method)){
     selectQQ <- quadHSIC(Reduce(`+`, K_select))
     sampleR <- drop(Y %*% selectQQ %*% Y)
     distR <- apply(samples, 2, function(s) return(s %*% selectQQ %*% s))
