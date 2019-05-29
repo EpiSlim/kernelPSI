@@ -103,7 +103,7 @@ kernelPSI(Y, K_select = Kmat[selectFOHSIC], constraintFO, method = c("ridge", "h
           n_replicates = n_replicates, burn_in = burn_in)
 #> $ridge
 #> [1] 0.953
-#>
+#> 
 #> $hsic
 #> [1] 0.504
 
@@ -113,3 +113,10 @@ kernelPSI(Y, K_select = Kmat[adaS], constraintFO, method = c("pca"),
 #> $pca
 #> [1] 0.89
 ```
+
+## References
+
+Lotfi Slim, Clément Chatelain, Chloé-Agathe Azencott, and Jean-Philippe
+Vert. kernelPSI: a post-selection inference framework for nonlinear
+variable selection, Proceedings of the Thirty-Sixth International
+Conference on Machine Learning (ICML), 2019.
