@@ -1,8 +1,9 @@
-beforehand---
+---
 title: "kernelPSI: a Post-Selection Inference Framework for Nonlinear Variable Selection"
 author: "Lotfi Slim"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+bibliography: bibliography.bib
 vignette: >
   %\VignetteIndexEntry{kernelPSI: a Post-Selection Inference Framework for Nonlinear Variable Selection}
   %\VignetteEngine{knitr::rmarkdown}
@@ -21,7 +22,7 @@ body {
 text-align: justify}
 </style>
 
-In this vignette, we illustrate on a synthetic dataset how to perform post-selection inference (PSI) for a set of kernels using our R package **kernelPSI**. The kernels are selected in a forward fashion according to quadratic kernel association scores, leading to the modeling of the selection event as a set of quadratic constraints. For valid inference, we need to correct for the bias introduced by the prior selection of the kernels. Determining the exact post-selection distribution of our test statistics under the selection event was impossible. To overcome that, we use sampling in order to derive empirical $p$-values.
+In this vignette, we illustrate on a synthetic dataset how to perform post-selection inference (PSI) for a set of kernels using our R package **kernelPSI** [@slim2019]. The kernels are selected in a forward fashion according to quadratic kernel association scores, leading to the modeling of the selection event as a set of quadratic constraints. For valid inference, we need to correct for the bias introduced by the prior selection of the kernels. Determining the exact post-selection distribution of our test statistics under the selection event was impossible. To overcome that, we use sampling in order to derive empirical $p$-values.
 
 ## Simulation
 
@@ -69,7 +70,7 @@ Lmat <- kernelMatrix(new("vanillakernel"), Y)
 ```
 
 ## Kernel selection
-The first step in PSI is to select the kernels. For that purpose, we use the function `FOHSIC` for the fixed variant and `adaFOHSIC`for the adaptive variant. Afterwards, to generate the list of matrices associated to the quadratic constraint of each selection event, we respectively apply `forwardQ` and `adaQ`.  
+The first step in PSI is to select the kernels. For that purpose, we use the function `FOHSIC` for the fixed variant and `adaFOHSIC` for the adaptive variant. Afterwards, to generate the list of matrices associated to the quadratic constraint of each selection event, we respectively apply `forwardQ` and `adaQ`.  
 ```{r}
 require("kernelPSI")
 
@@ -92,10 +93,12 @@ n_replicates <- 5000 # To be increased for real use cases
 burn_in <- 1000
 
 # Fixed variant ------------------
-kernelPSI(Y, K_select = Kmat[selectFOHSIC], constraintFO,
+kernelPSI(Y, K_select = Kmat[selectFOHSIC], constraintFO, method = c("ridge", "pca"), 
           n_replicates = n_replicates, burn_in = burn_in)
 
 # Adaptive variant ------------------
-kernelPSI(Y, K_select = Kmat[adaS], constraintFO,
+kernelPSI(Y, K_select = Kmat[adaS], constraintFO, method = "hsic", 
           n_replicates = n_replicates, burn_in = burn_in)
 ```
+
+## References
