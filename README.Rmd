@@ -15,8 +15,18 @@ knitr::opts_chunk$set(
 
 # kernelPSI
 
-This package implements an exhaustive framework to perform post-selection inference with kernels. It rests upon quadratic kernel association scores to measure the association between a given kernel and an outcome of interest. These scores are used for the
-selection of the kernels in a forward fashion. The selection procedure allows the modeling of the selection event as a succession of quadratic constraints of the outcome. Finally, under the selection event, we derive empirical p-values to measure the significance of the effect of the selected kernels on the outcome.
+This package implements an exhaustive framework to perform
+post-selection inference with kernels.
+
+It uses quadratic kernel association scores to measure the association between a given kernel and
+an outcome of interest. These scores are used for the selection of the
+kernels in a forward fashion. If kernels are defined on sets of features, this allows for non-linear feature selection; if the kernels used all belong to the same family, but with different hyperparameters, this allows for hyperparameter selection.
+
+The selection procedure allows the
+modeling of the selection event as a succession of quadratic constraints
+of the outcome. Finally, under the selection event, we derive empirical
+p-values to measure the significance of the effect of the selected
+kernels on the outcome.
 
 ## Installation
 
@@ -43,8 +53,8 @@ require("bindata")
 set.seed(64)
 
 # Generation of the covariates, the similarity matrices and the outcome
-n_kernels <- 10
-m_kernels <- 3
+n_kernels <- 10 # total number of kernels
+m_kernels <- 3  # number of kernels used to generate the outcome
 size_kernels <- 5
 
 theta <- .01
