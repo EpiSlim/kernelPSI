@@ -29,19 +29,23 @@ In this vignette, we illustrate on a synthetic dataset how to perform post-selec
 We first start by giving the setup for our simulation. We associate $10$ gaussian kernels to $10$ independent groups of variables of size $5$ each. Within each group, the variables are drawn from a multivariate normal distribution with mean $0$ and a correlation matrix $V_{ij} = \rho^{\lvert i-j\rvert}$, where $\rho = 0.6$ and $i,j\in[1\mathrel{{.}\,{.}} 5]$. The dataset we consider here consists of $100$ independent samples.
 
 ```{r, echo=FALSE}
-set.seed(12)
+set.seed(14)
 ```
 
 ```{r}
 require("MASS")
 
-n_kernels <- 10
-size_kernels <- 5
+n_kernels <- 10 # total number of kernels
+size_kernels <- 5 # dimensionality of the data associated to each kernel
 
-n <- 100
-rho <- 0.6
+n <- 100 # sample size
+rho <- 0.6 # correlation parameter
+
+# intra-group correlation matrix
 corr <- outer(seq_len(size_kernels), seq_len(size_kernels),
               function(i, j) return(rho^(abs(i-j))))
+
+# design matrix
 X <- replicate(n_kernels,
                mvrnorm(n, mu = rep(0, size_kernels), Sigma = corr),
                simplify = FALSE)
@@ -50,7 +54,9 @@ X <- replicate(n_kernels,
 To each group, we associate a local gaussian kernel $K$ of variance $\sigma^2 = 5$, *i.e.* $K(x_i, x_j) = \exp(\lvert\lvert x_i-x_j\rvert\rvert^2/\sigma^2)$.  
 ```{r}
 require("kernlab")
-K <- replicate(n_kernels, rbfdot(sigma = 1 / size_kernels))
+K <- replicate(n_kernels, rbfdot(sigma = 1 / size_kernels))  # full list of Gaussian kernels
+
+# List of Gram matrices
 Kmat <- sapply(seq_len(n_kernels),
                function(i) {kMatrix <- kernelMatrix(K[[i]], X[[i]]);
                return(as.kernelMatrix(kMatrix, center = TRUE))},
@@ -59,14 +65,14 @@ Kmat <- sapply(seq_len(n_kernels),
 
 We select the first three kernels as causal kernels, and simulate the outcome $Y$ in the following way: $Y\sim 0.1 * U + \epsilon$. $U$ is the first eigenvector of the similarity matrix of the sum kernel of the first three kernel and $\epsilon$ is a reduced gaussian random error. For the outcome, we consider the linear kernel.   
 ```{r}
-m_kernels <- 3
-theta <- 0.1
+m_kernels <- 3 # number of causal kernels
+theta <- 0.1 # amplitude of size effect
 
-Ksum <- Reduce(`+`, Kmat[seq_len(m_kernels)])
-decompK <- eigen(Ksum)
+Ksum <- Reduce(`+`, Kmat[seq_len(m_kernels)]) # sum kernel of the causal kernels
+decompK <- eigen(Ksum) # eigenvalue decomposition of the sum kernel Ksum
 
-Y <- as.matrix(theta * decompK$values[1] * decompK$vectors[, 1] + rnorm(n), ncol = 1)
-Lmat <- kernelMatrix(new("vanillakernel"), Y)
+Y <- as.matrix(theta * decompK$values[1] * decompK$vectors[, 1] + rnorm(n), ncol = 1) # response vector
+Lmat <- kernelMatrix(new("vanillakernel"), Y) # linear response vector
 ```
 
 ## Kernel selection
@@ -74,14 +80,14 @@ The first step in PSI is to select the kernels. For that purpose, we use the fun
 ```{r}
 require("kernelPSI")
 
-candidate_kernels <- 3
-selectFOHSIC <- FOHSIC(Kmat, Lmat, mKernels = candidate_kernels)
-constraintFO <- forwardQ(Kmat, selectFOHSIC)
+candidate_kernels <- 3 # number of kernels for the fixed variant
+selectFOHSIC <- FOHSIC(Kmat, Lmat, mKernels = candidate_kernels) # fixed variant
+constraintFO <- forwardQ(Kmat, selectFOHSIC) # list of quadratic constraints modeling the selection event
 ```
 If the number of causal kernels is not available beforehand, we resort to the adaptive version:  
 ```{r}
-selectAHSIC <- adaFOHSIC(Kmat, Lmat)
-adaFO <- adaQ(Kmat, selectAHSIC[["selection"]], selectAHSIC[["n"]])
+selectAHSIC <- adaFOHSIC(Kmat, Lmat) # adaptive variant
+adaFO <- adaQ(Kmat, selectAHSIC[["selection"]], selectAHSIC[["n"]]) # list of quadratic constraints for the adaptive selection method
 adaS <- selectAHSIC$selection[seq_len(selectAHSIC$n)] # indices of selected kernels
 ```
 
@@ -89,14 +95,17 @@ adaS <- selectAHSIC$selection[seq_len(selectAHSIC$n)] # indices of selected kern
 Finally, using the obtained constraints, we can derive PSI significance values for three statistics: the log-likelihood ratio for the ridge prototype, the log-likelihood ratio for the kernel PCA prototype and the HSIC score. The $p$-values are computed by comparing the statistics of the original response to those of replicates sampled within the acceptance region of the selection event. Most often, because of the difference in their statistical power, the methods yield different $p$-values.
 
 ```{r}
-n_replicates <- 5000 # To be increased for real use cases
-burn_in <- 1000
+n_replicates <- 5000 # number of replicates (statistical power and validity require a higher number of samples)
+burn_in <- 1000 # number of burn-in iterations
 
 # Fixed variant ------------------
+# selected methods: 'ridge' for the kernel ridge regression prototype 
+# and 'pca' for the kernel principal component regression prototype
 kernelPSI(Y, K_select = Kmat[selectFOHSIC], constraintFO, method = c("ridge", "pca"), 
           n_replicates = n_replicates, burn_in = burn_in)
 
 # Adaptive variant ------------------
+# selected methods: 'hsic' for the unbiased HSIC estimator
 kernelPSI(Y, K_select = Kmat[adaS], constraintFO, method = "hsic", 
           n_replicates = n_replicates, burn_in = burn_in)
 ```
