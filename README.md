@@ -20,14 +20,18 @@ significance of the effect of the selected kernels on the outcome.
 
 ## Installation
 
-You can install the released version of kernelPSI from
-[CRAN](https://CRAN.R-project.org) with:
+<!--
+You can install the released version of kernelPSI from [CRAN](https://CRAN.R-project.org) with:
 
-``` r
+
+```r
 install.packages("kernelPSI")
 ```
 
-The latest development version is directly available from
+The latest development version is directly available from [GitHub](https://github.com):
+-->
+
+The latest version is directly available from
 [GitHub](https://github.com):
 
 ``` r

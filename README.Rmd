@@ -30,6 +30,7 @@ kernels on the outcome.
 
 ## Installation
 
+<!--
 You can install the released version of kernelPSI from [CRAN](https://CRAN.R-project.org) with:
 
 ```{r CRAN, eval=FALSE}
@@ -37,6 +38,10 @@ install.packages("kernelPSI")
 ```
 
 The latest development version is directly available from [GitHub](https://github.com):
+--> 
+
+The latest version is directly available from [GitHub](https://github.com):
+
 ```{r GitHub, eval=FALSE}
 install.packages("devtools")
 devtools::install_github("EpiSlim/kernelPSI")
