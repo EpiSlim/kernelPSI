@@ -6,7 +6,7 @@ Authors@R: c(person("Lotfi", "Slim", email = "lotfi.slim@mines-paristech.fr", ro
   person("Clément", "Chatelain", email = "clement.chatelain@sanofi.com", role = "ctb"),
   person("Chloé-Agathe", "Azencott", email = "chloe-agathe.azencott@mines-paristech.fr", role ="ctb"),
   person("Jean-Philippe", "Vert", email = "jpvert@google.com", role ="ctb"))
-Description: implements different post-selection inference
+Description: Different post-selection inference
   strategies for kernel selection. The strategies rest upon quadratic kernel
   association scores to measure the association between a given kernel and an
   outcome of interest. The inference step tests for the joint effect of the
