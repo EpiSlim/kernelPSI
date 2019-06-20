@@ -12,4 +12,4 @@ reviewer.
 There were no ERRORs or WARNING or NOTES.
 
 ## r-hub builder results
-There were no ERRORs or WARNING or NOTES.
+There was 1 NOTE: "et al" which stands for "and others" in latin
