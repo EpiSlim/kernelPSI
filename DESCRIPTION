@@ -9,7 +9,7 @@ Authors@R: c(person("Lotfi", "Slim", email = "lotfi.slim@mines-paristech.fr", ro
 Description: Different post-selection inference strategies for kernel 
   selection, as described in "kernelPSI: a Post-Selection Inference Framework
   for Nonlinear Variable Selection", Slim et al., Proceedings of Machine 
-  Learning Research, 2019. The strategies rest upon quadratic kernel
+  Learning Research, 2019, <http://proceedings.mlr.press/v97/slim19a/slim19a.pdf>. The strategies rest upon quadratic kernel
   association scores to measure the association between a given kernel and an
   outcome of interest. The inference step tests for the joint effect of the
   selected kernels on the outcome. A fast constrained sampling algorithm is

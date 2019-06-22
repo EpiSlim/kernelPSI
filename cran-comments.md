@@ -4,9 +4,8 @@
 * win-builder (devel and release)
 
 ## CRAN
-This is my second submission to CRAN. I updated the date field and
-added a reference in the description field, as requested by the CRAN
-reviewer. 
+This is my third submission to CRAN. I added a link to the
+associated publication directly in the description field. 
 
 ## R CMD check results
 There were no ERRORs or WARNING or NOTES.
