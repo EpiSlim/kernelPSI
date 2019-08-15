@@ -4,8 +4,8 @@
 * win-builder (devel and release)
 
 ## CRAN
-This is my third submission to CRAN. I added a link to the
-associated publication directly in the description field. 
+This is an update to the kernelPSI package. The source code of the 
+functions HSIC and quadHSIC has been updated for better performance. 
 
 ## R CMD check results
 There were no ERRORs or WARNING or NOTES.
