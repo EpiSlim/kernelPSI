@@ -65,7 +65,7 @@ arma::mat sampleH(arma::field<arma::mat> A, NumericVector initial, int n_replica
                   int n_iter = 1.0e+5, int burn_in = 1.0e+3)
 {
 
-    int n = initial.size(), nreject = 0;
+    int n = initial.size();
     arma::mat qsamples(n, n_replicates + burn_in, arma::fill::zeros);
     arma::mat candidates(n, n_replicates + burn_in + 1, arma::fill::zeros);
     candidates.col(0) = Rcpp::as<arma::vec>(wrap(pnorm(initial, mu, sigma)));
@@ -99,16 +99,10 @@ arma::mat sampleH(arma::field<arma::mat> A, NumericVector initial, int n_replica
             {
                 *l = arma::as_scalar(qsamples.col(s).t() * A(r) * qsamples.col(s));
             }
-            if (all(cdt >= 0)) {
-                break;
-            } else {
-                nreject += 1; 
-            }
+            if (all(cdt >= 0)) break;
 
         }
     }
-    
-    Rprintf("Total number of rejections : %i \n", nreject);
 
     return qsamples.cols(burn_in, n_replicates + burn_in - 1);
 }
