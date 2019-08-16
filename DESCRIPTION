@@ -1,7 +1,7 @@
 Package: kernelPSI
 Title: Post-Selection Inference for Nonlinear Variable Selection
 Version: 1.1.0
-Date: 2019-06-20
+Date: 2019-08-16
 Authors@R: c(person("Lotfi", "Slim", email = "lotfi.slim@mines-paristech.fr", role = c("aut", "cre")),
   person("Clément", "Chatelain", email = "clement.chatelain@sanofi.com", role = "ctb"),
   person("Chloé-Agathe", "Azencott", email = "chloe-agathe.azencott@mines-paristech.fr", role ="ctb"),
