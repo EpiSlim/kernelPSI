@@ -2,19 +2,22 @@
 #include <RcppArmadilloExtensions/sample.h>
 using namespace Rcpp;
 
-#define VIENNACL_WITH_CUDA
-#define VIENNACL_WITH_OPENCL
-#define VIENNACL_WITH_OPENMP
+// #define VIENNACL_WITH_CUDA
+// #define VIENNACL_WITH_OPENCL
+// #define VIENNACL_WITH_OPENMP
 #define VIENNACL_WITH_ARMADILLO 1
 
 
 // ViennaCL headers
 #include "viennacl/vector.hpp"
 #include "viennacl/matrix.hpp"
+#include "viennacl/forwards.h"
+#include "viennacl/matrix_proxy.hpp"
+#include "viennacl/linalg/inner_prod.hpp"  
 
 
 // [[Rcpp::plugins(cpp11)]]
-// [[Rcpp::depends(RcppArmadillo, RViennaCL)]]
+// [[Rcpp::depends(RcppArmadillo)]]
 
 // [[Rcpp::export]]
 arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replicates,
@@ -39,9 +42,9 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
     
     // Declaring GPU objects
     viennacl::vector<double> vectorCL(n), resultCL(n);
-    viennacl::matrix<double, viennacl::col_major> matrixCL(n, n*A.nelem); 
-    for (int r = 0; r < A.nelem; ++r){
-        copy(A(r), project(matrixCL, range(0, n), range(n*r, n*(r+1))); // Regrouping the list of matrices in a single GPU matrix
+    viennacl::matrix<double, viennacl::column_major> matrixCL(n, n*A.n_elem); 
+    for (int r = 0; r < A.n_elem; ++r){
+        viennacl::copy(A(r), project(matrixCL, viennacl::range(0, n), viennacl::range(n*r, n*(r+1)))); // Regrouping the list of matrices in a single GPU matrix
     }
     
     
@@ -66,7 +69,7 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
             copy(qsamples.col(s), vectorCL);
             for(l = cdt.begin(), r = 0; l != cdt.end(); ++l, ++r)
             {
-                resultCL = viennacl::linalg::prod(project(matrixCL, range(0, n), range(n*l, n*(l+1)), vectorCL);
+                resultCL = viennacl::linalg::prod(project(matrixCL, viennacl::range(0, n), viennacl::range(n*r, n*(r+1)), vectorCL);
                 *l = viennacl::linalg::inner_prod(vectorCL, resultCL); 
             }
             if (all(cdt >= 0)) {
