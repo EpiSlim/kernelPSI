@@ -29,7 +29,7 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
     arma::mat qsamples(n, n_replicates + burn_in, arma::fill::zeros);
     arma::mat candidates(n, n_replicates + burn_in + 1, arma::fill::zeros);
     candidates.col(0) = Rcpp::as<arma::vec>(wrap(pnorm(initial, mu, sigma)));
-    arma::vec candidateO(n), candidateN = Rcpp::as<arma::vec>(wrap(pnorm(initial, mu, sigma)));
+    arma::vec candidateO(n), candidateQ(n), candidateN = Rcpp::as<arma::vec>(wrap(pnorm(initial, mu, sigma)));
 
     // Randomly sample in the sphere unit
     arma::mat theta(n, n_replicates + burn_in, arma::fill::randn);
@@ -39,13 +39,15 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
     arma::vec cdt(A.n_elem);
     arma::vec::iterator l;
     arma::vec boundA, boundB;
+    arma::mat matA(n, n*A.n_elem);
+    for (int r = 0; r < A.n_elem; ++r){
+        matA(0, n*r, size(A(r))) = A(r); // Regrouping the list of matrices in a single GPU matrix
+    }
     
     // Declaring GPU objects
     viennacl::vector<double> vectorCL(n), resultCL(n);
     viennacl::matrix<double, viennacl::column_major> matrixCL(n, n*A.n_elem); 
-    for (int r = 0; r < A.n_elem; ++r){
-        viennacl::copy(A(r), project(matrixCL, viennacl::range(0, n), viennacl::range(n*r, n*(r+1)))); // Regrouping the list of matrices in a single GPU matrix
-    }
+    copy(matA, matrixCL); 
     
     
     int r;
@@ -65,14 +67,15 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
             if (iter == n_iter) stop("The quadratic constraints cannot be satisfied");
             double lambda = runif(1, leftQ, rightQ)[0];
             candidateN = candidateO + lambda * theta.col(s);
-            qsamples.col(s) = Rcpp::as<arma::vec>(wrap(qnorm(as<NumericVector>(wrap(candidateN)), mu, sigma)));
-            copy(qsamples.col(s), vectorCL);
+            candidateQ = Rcpp::as<arma::vec>(wrap(qnorm(as<NumericVector>(wrap(candidateN)), mu, sigma)));
+            viennacl::copy(candidateQ, vectorCL);
             for(l = cdt.begin(), r = 0; l != cdt.end(); ++l, ++r)
             {
-                resultCL = viennacl::linalg::prod(project(matrixCL, viennacl::range(0, n), viennacl::range(n*r, n*(r+1)), vectorCL);
+                resultCL = viennacl::linalg::prod(viennacl::project(matrixCL, viennacl::range(0, n), viennacl::range(n*r, n*(r+1))), vectorCL);
                 *l = viennacl::linalg::inner_prod(vectorCL, resultCL); 
             }
             if (all(cdt >= 0)) {
+                qsamples.col(s) = candidateQ; 
                 break;
             }
 
