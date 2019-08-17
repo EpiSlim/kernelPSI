@@ -36,8 +36,6 @@ all : rcppcuda.so
 
 rcppcuda.so: $(OBJECTS)
 
-%.o: %.cpp $(cpp_sources)
-        $(CXX) $< -c -fPIC
+%.o: %.cpp $(cpp_sources) $(CXX) $< -c -fPIC
 
-%.o: %.cu $(cu_sources)
-        $(NVCC) $(NVCC_FLAGS) -I$(CUDA_INC) $< -c
+%.o: %.cu $(cu_sources) $(NVCC) $(NVCC_FLAGS) -I$(CUDA_INC) $< -c
