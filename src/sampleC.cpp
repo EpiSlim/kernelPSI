@@ -72,7 +72,8 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
             for(l = cdt.begin(), r = 0; l != cdt.end(); ++l, ++r)
             {
                 resultCL = viennacl::linalg::prod(viennacl::project(matrixCL, viennacl::range(0, n), viennacl::range(n*r, n*(r+1))), vectorCL);
-                *l = viennacl::linalg::inner_prod(vectorCL, resultCL); 
+                //*l = viennacl::linalg::inner_prod(vectorCL, resultCL); 
+                *l = 1; 
             }
             if (all(cdt >= 0)) {
                 qsamples.col(s) = candidateQ; 
