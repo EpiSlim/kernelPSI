@@ -12,7 +12,7 @@
 CXX = g++
 CXX_STD = CXX11
 
-PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -I$(CUDA_HOME)/include
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -I$(CUDA_HOME)/include -I$(HOME)/.local2/ViennaCL-1.7.1/viennacl
 PKG_LIBS= $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -L$(CUDA_HOME)/lib64 -Wl,-rpath,$(CUDA_HOME)/lib64 -lcudart -d
 
 # Standard configuration --------
