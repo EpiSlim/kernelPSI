@@ -2,9 +2,9 @@
 #include <RcppArmadilloExtensions/sample.h>
 using namespace Rcpp;
 
-// #define VIENNACL_WITH_CUDA
-// #define VIENNACL_WITH_OPENCL
-// #define VIENNACL_WITH_OPENMP
+#define VIENNACL_WITH_CUDA
+#define VIENNACL_WITH_OPENCL
+#define VIENNACL_WITH_OPENMP
 #define VIENNACL_WITH_ARMADILLO 1
 
 
