@@ -31,6 +31,6 @@ Suggests:
     MASS,
     testthat
 Encoding: UTF-8
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo: Rcpp, RcppArmadillo, RViennaCL
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1
