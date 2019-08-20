@@ -8,5 +8,8 @@ src/*.dll
 inst/doc
 .Rbuildignore
 kernelPSI.Rproj
+config.log
+config.status
+autom4te.cache/
 doc
 Meta

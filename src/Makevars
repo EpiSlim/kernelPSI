@@ -1,41 +1,39 @@
-
-## With R 3.1.0 or later, you can uncomment the following line to tell R to
-## enable compilation with C++11 (where available)
-##
-## Also, OpenMP support in Armadillo prefers C++11 support. However, for wider
-## availability of the package we do not yet enforce this here.  It is however
-## recommended for client packages to set it.
-##
-## And with R 3.4.0, and RcppArmadillo 0.7.960.*, we turn C++11 on as OpenMP
-## support within Armadillo prefers / requires it
-
-CXX = g++
 CXX_STD = CXX11
 
-PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -I$(CUDA_HOME)/include -I$(HOME)/.local2/ViennaCL-1.7.1
-PKG_LIBS= $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -L$(CUDA_HOME)/lib64 -Wl,-rpath,$(CUDA_HOME)/lib64 -lcudart -d
+PKG_CPPFLAGS = -I. -I../inst/include
+PKG_CXXFLAGS = 
 
-# Standard configuration --------
+PKG_LIBS =  -L/site/rp/app/x86_64/tools/cuda/10.0/lib64 -Wl,-rpath,/site/rp/app/x86_64/tools/cuda/10.0/lib64 -lcudart
+R_LIBS = -Wl,--export-dynamic -fopenmp -lcurl -L/site/rp/app/x86_64/tools/libcurl/curl/lib/ -L/site/rp/app/x86_64/tools/anaconda-python/3/pkgs/pcre-8.39-0/lib -L/site/rp/app/x86_64/tools/anaconda-python/3/pkgs/xz-5.2.2-1/lib -L/site/rp/app/x86_64/tools/zlib/1.2.5/lib -L/site/rp/app/x86_64/tools/bzlib/1.0.6/lib -L/usr/lib64 -L/site/rp/app/x86_64/discovery/R/RHEL7/3.5.0/lib64/R/lib -lR -lpcre -llzma -lbz2 -lz -lrt -ldl -lm -licuuc -licui18n
 
-NVCC = $(CUDA_HOME)/bin/nvcc
-CUDA_INC = $(CUDA_HOME)/include
-CUDA_LIB = $(CUDA_HOME)/lib64
-
-LIBS = -lcudart -d
-NVCC_FLAGS = -Xcompiler "-fPIC" -gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35
-
-cu_sources := $(wildcard *cu)
-cu_sharedlibs := $(patsubst %.cu, %.o,$(cu_sources))
-
-cpp_sources := $(wildcard *.cpp)
+cpp_sources := $(filter-out sampleC.cpp,$(wildcard *.cpp))
 cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
 
-OBJECTS = $(cu_sharedlibs) $(cpp_sharedlibs)
+cu_sources := sampleC.cpp
+#cu_sharedlibs := $(patsubst %.cpp, %.o, $(cu_sources))
+cu_sharedlibs := sampleC.o
 
-all : rcppcuda.so
 
-rcppcuda.so: $(OBJECTS)
+OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
 
-%.o: %.cpp $(cpp_sources) $(CXX) $< -c -fPIC
+R_INC = -I/../inst/include -I/site/rp/app/x86_64/discovery/R/RHEL7/3.5.0/lib64/R/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/Rcpp/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/thrust/include 
+CXX_ARGS = -fpic
 
-%.o: %.cu $(cu_sources) $(NVCC) $(NVCC_FLAGS) -I$(CUDA_INC) $< -c
+CU_ARGS = -Xcompiler -fPIC -Xcudafe --diag_suppress=code_is_unreachable
+CU_INCL = -I../inst/include -I/site/rp/app/x86_64/discovery/R/RHEL7/3.5.0/lib64/R/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/Rcpp/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/thrust/include
+CU_ARCH = -arch=sm_30
+
+CXX=g++
+NVCC=/site/rp/app/x86_64/tools/cuda/10.0/bin/nvcc
+
+all: kernelPSI.so
+
+kernelPSI.so: $(OBJECTS)
+
+%.o: $(cu_sources)
+	    $(NVCC) $(R_INC) -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/RcppArmadillo/include/ -I/site/rp/home/I0302571/.local2/ViennaCL-1.7.1 -gencode arch=compute_30,code=sm_30 -std=c++11 -DGPU -x cu -c $(CU_ARGS) $(CU_INCL) $< -c
+%.o: $(cpp_sources)
+	    $(CXX) $(R_INCL) $< -c
+
+clean:
+	@rm -rf *.o *.so *.dll

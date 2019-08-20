@@ -3,7 +3,7 @@
 using namespace Rcpp;
 
 #define VIENNACL_WITH_CUDA
-#define VIENNACL_WITH_OPENCL
+//#define VIENNACL_WITH_OPENCL
 #define VIENNACL_WITH_OPENMP
 #define VIENNACL_WITH_ARMADILLO 1
 
@@ -13,7 +13,7 @@ using namespace Rcpp;
 #include "viennacl/matrix.hpp"
 #include "viennacl/forwards.h"
 #include "viennacl/matrix_proxy.hpp"
-#include "viennacl/linalg/inner_prod.hpp"  
+#include "viennacl/linalg/inner_prod.hpp"
 
 
 // [[Rcpp::plugins(cpp11)]]
@@ -43,25 +43,25 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
     for (int r = 0; r < A.n_elem; ++r){
         matA(0, n*r, size(A(r))) = A(r); // Regrouping the list of matrices in a single GPU matrix
     }
-    
+
     // Declaring GPU objects
     viennacl::vector<double> vectorCL(n), resultCL(n);
-    viennacl::matrix<double, viennacl::column_major> matrixCL(n, n*A.n_elem); 
-    copy(matA, matrixCL); 
-    
-    
+    viennacl::matrix<double, viennacl::column_major> matrixCL(n, n*A.n_elem);
+    copy(matA, matrixCL);
+
+
     int r;
     for (int s = 0; s < (n_replicates + burn_in); ++s)
     {
         candidateO = candidateN;
-        
+
         boundA = -(candidateO/theta.col(s));
         boundB = (1 - candidateO)/theta.col(s);
         double leftQ = std::max(boundA.elem(arma::find(theta.col(s) > 0)).max(),
                                 boundB.elem(arma::find(theta.col(s) < 0)).max());
         double rightQ = std::min(boundA.elem(arma::find(theta.col(s) < 0)).min(),
                                  boundB.elem(arma::find(theta.col(s) > 0)).min());
-        
+
         for (int iter = 0; iter < n_iter; ++iter)
         {
             if (iter == n_iter) stop("The quadratic constraints cannot be satisfied");
@@ -72,11 +72,10 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
             for(l = cdt.begin(), r = 0; l != cdt.end(); ++l, ++r)
             {
                 resultCL = viennacl::linalg::prod(viennacl::project(matrixCL, viennacl::range(0, n), viennacl::range(n*r, n*(r+1))), vectorCL);
-                //*l = viennacl::linalg::inner_prod(vectorCL, resultCL); 
-                *l = 1; 
+                *l = viennacl::linalg::inner_prod(vectorCL, resultCL);
             }
             if (all(cdt >= 0)) {
-                qsamples.col(s) = candidateQ; 
+                qsamples.col(s) = candidateQ;
                 break;
             }
 

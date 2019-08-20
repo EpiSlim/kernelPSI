@@ -1,0 +1,39 @@
+CXX_STD = CXX11
+
+PKG_CPPFLAGS = @GPURCUDA_CPPFLAGS@
+PKG_CXXFLAGS = @GPURCUDA_CXXFLAGS@
+
+PKG_LIBS = @GPURCUDA_LIBS@
+R_LIBS = @R_LIBS@
+
+cpp_sources := $(filter-out sampleC.cpp,$(wildcard *.cpp))
+cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
+
+cu_sources := sampleC.cpp
+#cu_sharedlibs := $(patsubst %.cpp, %.o, $(cu_sources))
+cu_sharedlibs := sampleC.o
+
+
+OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
+
+R_INC = -I/../inst/include @R_INCL@ @RCPP_INCL@ @THRUST_INCL@ @CU_INCL@
+CXX_ARGS = @R_CPIC@
+
+CU_ARGS = -Xcompiler -fPIC -Xcudafe --diag_suppress=code_is_unreachable
+CU_INCL = -I../inst/include @R_INCL@ @RCPP_INCL@ @THRUST_INCL@
+CU_ARCH = -arch=sm_30
+
+CXX=@CXX@
+NVCC=@NVCC@
+
+all: kernelPSI.so
+
+kernelPSI.so: $(OBJECTS)
+
+%.o: $(cu_sources)
+	    $(NVCC) $(R_INC) -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/RcppArmadillo/include/ -I/site/rp/home/I0302571/.local2/ViennaCL-1.7.1 -gencode arch=compute_30,code=sm_30 -std=c++11 -DGPU -x cu -c $(CU_ARGS) $(CU_INCL) $< -c
+%.o: $(cpp_sources)
+	    $(CXX) $(R_INCL) $< -c
+
+clean:
+	@rm -rf *.o *.so *.dll
