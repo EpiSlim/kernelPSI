@@ -14,11 +14,15 @@ cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
 
 OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
 
-R_INC = -I/../inst/include -I/site/rp/app/x86_64/discovery/R/RHEL7/3.5.0/lib64/R/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/Rcpp/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/thrust/include 
+R_INC = -I../inst/include -I/site/rp/app/x86_64/discovery/R/RHEL7/3.5.0/lib64/R/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/Rcpp/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/thrust/include 
 CXX_ARGS = -fpic
 
-CU_ARGS = -Xcompiler -fPIC -Xcudafe --diag_suppress=code_is_unreachable -Xcudafe --diag_suppress=initialization_not_reachable -Xcudafe --diag_suppress=missing_initializer_on_const -Xcudafe --diag_suppress=declared_but_not_referenced
-CU_INCL = -I../inst/include -I/site/rp/app/x86_64/discovery/R/RHEL7/3.5.0/lib64/R/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/Rcpp/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/thrust/include
+CU_ARGS := -Xcompiler -fPIC
+CU_ARGS += -Xcudafe --diag_suppress=code_is_unreachable
+CU_ARGS += -Xcudafe --diag_suppress=initialization_not_reachable
+CU_ARGS += -Xcudafe --diag_suppress=missing_initializer_on_const
+CU_ARGS += -Xcudafe --diag_suppress=declared_but_not_referenced
+CU_INCL = -I../inst/include/ -I/site/rp/app/x86_64/discovery/R/RHEL7/3.5.0/lib64/R/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/Rcpp/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/thrust/include
 CU_ARCH = -arch=sm_35
 
 CXX=g++
@@ -29,10 +33,10 @@ all: kernelPSI.so
 kernelPSI.so: $(OBJECTS)
 
 %.o: %.cpp $(cpp_sources)
-	$(CXX) -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/RcppArmadillo/include/ $(CXX_ARGS) $(R_INC) -c $< -o $@
+	$(CXX) $(CXX_ARGS) $(R_INC) -c $< -o $@
 
 %.o: %.cu $(cu_sources)
-	$(NVCC) -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/RcppArmadillo/include/ -I/site/rp/home/I0302571/.local2/ViennaCL-1.7.1 -gencode arch=compute_35,code=sm_35 -std=c++11 -DGPU -x cu -c $(CU_ARGS) $(CU_INCL) -c $< -o $@
+	$(NVCC) -gencode arch=compute_35,code=sm_35 -std=c++11 -DGPU -x cu -c $(CU_ARGS) $(CU_INCL) -c $< -o $@
 
 clean:
 	@rm -rf *.o *.so *.dll
