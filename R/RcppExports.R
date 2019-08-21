@@ -189,7 +189,7 @@ quadHSIC <- function(K) {
     .Call(`_kernelPSI_quadHSIC`, K)
 }
 
-sampleC <- function(A, initial, n_replicates, mu = 0.0, sigma = 1.0, n_iter = 1.0e+5, burn_in = 1.0e+3) {
+sampleC <- function(A, initial, n_replicates, mu, sigma, n_iter, burn_in) {
     .Call(`_kernelPSI_sampleC`, A, initial, n_replicates, mu, sigma, n_iter, burn_in)
 }
 

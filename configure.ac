@@ -1,4 +1,4 @@
-AC_INIT([gpuRcuda], 1.0.0)
+AC_INIT([kernelPSI], 1.1.0)
 
 AC_LANG(C++)
 AC_REQUIRE_CPP
@@ -31,14 +31,14 @@ elif test "$BACKEND" = "CUDA"; then
 		else
 		    AC_MSG_RESULT("using CUDA_HOME=${CUDA_HOME}")
 		fi
-		
+
 		AC_CHECK_FILE([${CUDA_HOME}/bin/nvcc], [HAS_NVCC="yes"])
 		if test -z "${HAS_NVCC}"; then
 		    AC_MSG_ERROR("NVCC not found; check CUDA install")
 		else
 		    AC_MSG_RESULT("NVCC found")
 		fi
-		
+
 		AC_MSG_CHECKING("whether this is the 64 bit linux version of CUDA")
 		AC_CHECK_FILE([${CUDA_HOME}/lib64/libcudart.so], [BIT64="yes"])
 		if test -z "${BIT64}"; then
@@ -57,7 +57,7 @@ elif test "$BACKEND" = "CUDA"; then
 else
 
 		AC_MSG_NOTICE("No recognized BACKEND defined so trying CUDA first")
-		
+
 		AC_MSG_CHECKING("Checking environment variable CUDA_HOME")
 		if test -z "${CUDA_HOME}"; then
 		    CUDA_HOME=`find /usr/local/ -maxdepth 1 -type d -name "cuda*" | sort -V | tail -1`
@@ -66,7 +66,7 @@ else
 		#else
 		#    AC_MSG_RESULT("using CUDA_HOME=${CUDA_HOME}")
 		#fi
-		
+
 		if test -z "${CUDA_HOME}"; then
 			AC_MSG_RESULT("No CUDA installation found, attempting OPENMP install")
 			GPURCUDA_CPPFLAGS="${GPURCUDA_CPPFLAGS} -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP"
@@ -84,7 +84,7 @@ else
 			else
 			    AC_MSG_RESULT("NVCC found")
 			fi
-			
+
 			AC_MSG_CHECKING("whether this is the 64 bit linux version of CUDA")
 			AC_CHECK_FILE([${CUDA_HOME}/lib64/libcudart.so], [BIT64="yes"])
 			if test -z "${BIT64}"; then
@@ -110,7 +110,7 @@ AC_DEFUN([AC_PROG_RSCRIPT], [AC_CHECK_PROG(RSCRIPT,Rscript,yes)])
 AC_PROG_RSCRIPT
 
 if test x"${RSCRIPT}" == x"yes" ; then
-		
+
 		R_HOME=`Rscript -e 'cat(R.home())'`
 
     rcpp_incl=`${R_HOME}/bin/Rscript -e 'Rcpp:::CxxFlags()'`
