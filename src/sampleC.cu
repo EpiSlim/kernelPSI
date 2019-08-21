@@ -1,11 +1,13 @@
-#include <RcppArmadillo.h>
-#include <RcppArmadilloExtensions/sample.h>
-using namespace Rcpp;
+#define ARMA_ALLOW_FAKE_GCC
 
 #define VIENNACL_WITH_CUDA
 //#define VIENNACL_WITH_OPENCL
 #define VIENNACL_WITH_OPENMP
 #define VIENNACL_WITH_ARMADILLO 1
+
+#include <RcppArmadillo.h>
+#include <RcppArmadilloExtensions/sample.h>
+using namespace Rcpp;
 
 
 // ViennaCL headers
@@ -27,7 +29,6 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
     int n = initial.size();
     arma::mat qsamples(n, n_replicates + burn_in, arma::fill::zeros);
     arma::mat candidates(n, n_replicates + burn_in + 1, arma::fill::zeros);
-    candidates.col(0) = Rcpp::as<arma::vec>(wrap(pnorm(initial, mu, sigma)));
     arma::vec candidateO(n), candidateQ(n), candidateN = Rcpp::as<arma::vec>(wrap(pnorm(initial, mu, sigma)));
 
     // Randomly sample in the sphere unit
@@ -37,7 +38,7 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
     // Rejection sampling
     arma::vec cdt(A.n_elem);
     arma::vec::iterator l;
-    arma::vec boundA(n), boundB(n);
+    arma::vec boundA, boundB;
     arma::mat matA(n, n*A.n_elem);
     for (int r = 0; r < A.n_elem; ++r){
         matA(0, n*r, size(A(r))) = A(r); // Regrouping the list of matrices in a single GPU matrix

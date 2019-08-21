@@ -9,19 +9,15 @@ R_LIBS = @R_LIBS@
 cu_sources := sampleC.cu
 cu_sharedlibs := $(patsubst %.cu, %.o, $(cu_sources))
 
-#cpp_sources := $(filter-out sampleC.cpp, $(wildcard *.cpp))
-#cpp_sources := $(wildcard *.cpp)
 cpp_sources := $(filter-out sampleC.cpp, $(wildcard *.cpp))
 cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
 
-#OBJECTS = $(cu_sharedlibs)
-#OBJECTS = $(cpp_sharedlibs)
 OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
 
 R_INC = -I/../inst/include @R_INCL@ @RCPP_INCL@ @THRUST_INCL@ @CU_INCL@
 CXX_ARGS = @R_CPIC@
 
-CU_ARGS = -Xcompiler -fPIC -Xcudafe --diag_suppress=code_is_unreachable
+CU_ARGS = -Xcompiler -fPIC -Xcudafe --diag_suppress=code_is_unreachable -Xcudafe --diag_suppress=initialization_not_reachable -Xcudafe --diag_suppress=missing_initializer_on_const -Xcudafe --diag_suppress=declared_but_not_referenced
 CU_INCL = -I../inst/include @R_INCL@ @RCPP_INCL@ @THRUST_INCL@
 CU_ARCH = -arch=sm_35
 
@@ -40,9 +36,3 @@ kernelPSI.so: $(OBJECTS)
 
 clean:
 	@rm -rf *.o *.so *.dll
-
-#%.o: %.cu $(cu_sources)
-#		$(NVCC) $(CU_ARCH) $(CU_ARGS) $(CU_INCL) $< -c
-
-#clean:
-#		rm -rf *.o Makevars
