@@ -251,3 +251,7 @@ sampleH <- function(A, initial, n_replicates, mu = 0.0, sigma = 1.0, n_iter = 1.
     .Call(`_kernelPSI_sampleH`, A, initial, n_replicates, mu, sigma, n_iter, burn_in)
 }
 
+sampleT <- function(A, initial, n_replicates, mu, sigma, n_iter, burn_in) {
+    .Call(`_kernelPSI_sampleT`, A, initial, n_replicates, mu, sigma, n_iter, burn_in)
+}
+

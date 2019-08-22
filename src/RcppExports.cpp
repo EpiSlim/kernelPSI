@@ -113,6 +113,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sampleT
+arma::mat sampleT(arma::field<arma::mat> A, NumericVector initial, int n_replicates, double mu, double sigma, int n_iter, int burn_in);
+RcppExport SEXP _kernelPSI_sampleT(SEXP ASEXP, SEXP initialSEXP, SEXP n_replicatesSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP n_iterSEXP, SEXP burn_inSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::field<arma::mat> >::type A(ASEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type initial(initialSEXP);
+    Rcpp::traits::input_parameter< int >::type n_replicates(n_replicatesSEXP);
+    Rcpp::traits::input_parameter< double >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< int >::type n_iter(n_iterSEXP);
+    Rcpp::traits::input_parameter< int >::type burn_in(burn_inSEXP);
+    rcpp_result_gen = Rcpp::wrap(sampleT(A, initial, n_replicates, mu, sigma, n_iter, burn_in));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_kernelPSI_adaFOHSIC", (DL_FUNC) &_kernelPSI_adaFOHSIC, 2},
@@ -123,6 +140,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_kernelPSI_quadHSIC", (DL_FUNC) &_kernelPSI_quadHSIC, 1},
     {"_kernelPSI_sampleC", (DL_FUNC) &_kernelPSI_sampleC, 7},
     {"_kernelPSI_sampleH", (DL_FUNC) &_kernelPSI_sampleH, 7},
+    {"_kernelPSI_sampleT", (DL_FUNC) &_kernelPSI_sampleT, 7},
     {NULL, NULL, 0}
 };
 

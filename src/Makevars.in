@@ -6,10 +6,10 @@ PKG_CXXFLAGS = @GPURCUDA_CXXFLAGS@
 PKG_LIBS = @GPURCUDA_LIBS@
 R_LIBS = @R_LIBS@
 
-cu_sources := sampleC.cu
+cu_sources := $(wildcard *.cu)
 cu_sharedlibs := $(patsubst %.cu, %.o, $(cu_sources))
 
-cpp_sources := $(filter-out sampleC.cpp, $(wildcard *.cpp))
+cpp_sources := $(wildcard *.cpp)
 cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
 
 OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)

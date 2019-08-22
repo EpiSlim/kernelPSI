@@ -6,10 +6,10 @@ PKG_CXXFLAGS =
 PKG_LIBS =  -L/site/rp/app/x86_64/tools/cuda/8.0/lib64 -Wl,-rpath,/site/rp/app/x86_64/tools/cuda/8.0/lib64 -lcudart
 R_LIBS = -Wl,--export-dynamic -fopenmp -lcurl -L/site/rp/app/x86_64/tools/libcurl/curl/lib/ -L/site/rp/app/x86_64/tools/anaconda-python/3/pkgs/pcre-8.39-0/lib -L/site/rp/app/x86_64/tools/anaconda-python/3/pkgs/xz-5.2.2-1/lib -L/site/rp/app/x86_64/tools/zlib/1.2.5/lib -L/site/rp/app/x86_64/tools/bzlib/1.0.6/lib -L/usr/lib64 -L/site/rp/app/x86_64/discovery/R/RHEL7/3.5.0/lib64/R/lib -lR -lpcre -llzma -lbz2 -lz -lrt -ldl -lm -licuuc -licui18n
 
-cu_sources := sampleC.cu
+cu_sources := $(wildcard *.cu)
 cu_sharedlibs := $(patsubst %.cu, %.o, $(cu_sources))
 
-cpp_sources := $(filter-out sampleC.cpp, $(wildcard *.cpp))
+cpp_sources := $(wildcard *.cpp)
 cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
 
 OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
