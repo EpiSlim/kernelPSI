@@ -55,11 +55,7 @@ arma::mat sampleT(arma::field<arma::mat> A, NumericVector initial, int n_replica
     viennacl::matrix<double, viennacl::row_major> prodCL(A.n_elem, n);
     copy(matA, matrixCL);
 
-    double time_prod = 0, time_loop = 0, time_out = 0;
-    high_resolution_clock::time_point prodt1, prodt2, loopt1, loopt2, outt1, outt2;
-
     int r;
-    outt1 = high_resolution_clock::now();
     for (int s = 0; s < (n_replicates + burn_in); ++s)
     {
 
@@ -84,25 +80,14 @@ arma::mat sampleT(arma::field<arma::mat> A, NumericVector initial, int n_replica
             candidateN = candidateO + lambda * thetaV;
             candidateQ = Rcpp::as<arma::vec>(wrap(qnorm(as<NumericVector>(wrap(candidateN)), mu, sigma)));
 
-            loopt1 = high_resolution_clock::now();
             viennacl::copy(candidateQ, vectorCL);
-            loopt2 = high_resolution_clock::now();
-            time_loop += duration_cast<duration<double>>(loopt2 - loopt1).count();
-
-            prodt1 = high_resolution_clock::now();
             resultCL = viennacl::linalg::prod(matrixCL, vectorCL);
-            prodt2 = high_resolution_clock::now();
-            time_prod += duration_cast<duration<double>>(prodt2 - prodt1).count();
-
 
             baseCL = viennacl::matrix_base<double> (resultCL.handle(),
                                                     A.n_elem, 0, 1, A.n_elem,
                                                     n, 0, 1, n,
                                                     true);
-
             prodCL = baseCL;
-
-
             cdtCL = viennacl::linalg::prod(prodCL, vectorCL);
 
             if (viennacl::linalg::min(cdtCL) >= 0) {
@@ -114,12 +99,6 @@ arma::mat sampleT(arma::field<arma::mat> A, NumericVector initial, int n_replica
 
 
     }
-    outt2 = high_resolution_clock::now();
-    time_out += duration_cast<duration<double>>(outt2 - outt1).count();
-
-    Rprintf("time prod = %f secs\n", time_prod);
-    Rprintf("time loop = %f secs\n", time_loop);
-    Rprintf("time out = %f secs\n", time_out);
 
     return qsamples.cols(burn_in, n_replicates + burn_in - 1);
 }
