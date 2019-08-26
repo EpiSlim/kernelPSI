@@ -13,9 +13,17 @@ using namespace std::chrono;
 // #include <RcppArmadilloExtensions/sample.h>
 using namespace Rcpp;
 
+
+// Cuda headers
+#include <cuda.h>
+#include <curand.h>
+
 // Thrust headers
 #include <thrust/device_vector.h>
+#include <thrust/functional.h>
 #include <thrust/transform.h>
+#include <thrust/transform_reduce.h>
+
 #include <thrust/random/uniform_real_distribution.h>
 
 
@@ -52,6 +60,11 @@ double sampleQ(arma::field<arma::mat> A, arma::vec initial, int n_replicates,
                   const double mu = 0.0, const double sigma = 1.0,
                   int n_iter = 1.0e+5, int burn_in = 1.0e+3)
 {
+    // Setting the generator
+    curandGenerator_t gen;
+    curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
+    curandSetPseudoRandomGeneratorSeed(gen, 1234ULL);
+
     // Functors
     normcdf_f<double> normcdf_functor(mu, sigma);
     normcdfinv_f<double> normcdfinv_functor(mu, sigma);
@@ -70,11 +83,16 @@ double sampleQ(arma::field<arma::mat> A, arma::vec initial, int n_replicates,
     }
     thrust::copy(matA.begin(), matA.end(), constraints.begin());
 
+    // sample a uniform vector
+    double leftQ = 0, rightQ = 1;
+    double lambda;
 
+    /* Generate n floats on device */
+    curandGenerateUniform(gen, &lambda, 1);
 
     // Rejection sampling
     thrust::device_vector<double> theta(n, 0);
     thrust::device_vector<double> boundA(n, 0), boundB(n, 0);
 
-    return 1;
+    return lambda;
 }
