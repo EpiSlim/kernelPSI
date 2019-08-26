@@ -13,92 +13,68 @@ using namespace std::chrono;
 // #include <RcppArmadilloExtensions/sample.h>
 using namespace Rcpp;
 
-// ViennaCL headers
-#include "viennacl/vector.hpp"
-#include "viennacl/matrix.hpp"
-#include "viennacl/forwards.h"
-#include "viennacl/matrix_proxy.hpp"
-#include "viennacl/linalg/inner_prod.hpp"
-#include "viennacl/linalg/maxmin.hpp"
+// Thrust headers
+#include <thrust/device_vector.h>
+#include <thrust/transform.h>
+#include <thrust/random/uniform_real_distribution.h>
 
 
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
-arma::mat sampleQ(Rcpp::List A, NumericVector initial, int n_replicates,
-                  double mu = 0.0, double sigma = 1.0,
+template<class T>
+struct normcdf_f{
+    T mu;
+    T sigma;
+    normcdf_f(T _mu, T _sigma){
+        mu=_mu;
+        sigma=_sigma;
+    }
+    __host__ __device__ T operator()(T &x) const{
+        return normcdf((x-mu)/sigma);
+    }
+};
+
+template<class T>
+struct normcdfinv_f{
+    T mu;
+    T sigma;
+    normcdfinv_f(T _mu, T _sigma){
+        mu=_mu;
+        sigma=_sigma;
+    }
+    __host__ __device__ T operator()(T &x) const{
+        return (normcdfinv(x) * sigma + mu);
+    }
+};
+
+double sampleQ(arma::field<arma::mat> A, arma::vec initial, int n_replicates,
+                  const double mu = 0.0, const double sigma = 1.0,
                   int n_iter = 1.0e+5, int burn_in = 1.0e+3)
 {
+    // Functors
+    normcdf_f<double> normcdf_functor(mu, sigma);
+    normcdfinv_f<double> normcdfinv_functor(mu, sigma);
 
+    // Initialization
     int n = initial.size();
-    arma::mat qsamples(n, n_replicates + burn_in, arma::fill::zeros);
-    arma::mat candidates(n, n_replicates + burn_in + 1, arma::fill::zeros);
-    arma::vec candidateO(n), candidateQ(n), candidateN = Rcpp::as<arma::vec>(wrap(pnorm(initial, mu, sigma)));
+    thrust::device_vector<double> candidateN(n), candidateQ(initial.begin(), initial.end());
+    thrust::device_vector<double> qsamples(n*(n_replicates + burn_in), 0);
+    thrust::device_vector<double> constraints(n*n*A.n_elem, 0);
 
-    // Randomly sample in the sphere unit
-    arma::vec thetaV(n);
-    arma::mat theta(n, n_replicates + burn_in, arma::fill::randn);
-    theta = arma::normalise(theta, 2, 0);
+    thrust::transform(candidateQ.begin(), candidateQ.end(), candidateN.begin(), normcdf_functor);
 
-    // Rejection sampling
-    arma::vec::iterator l;
-    arma::vec boundA, boundB;
     arma::mat matA(n*A.n_elem, n);
     for (int r = 0; r < A.n_elem; ++r){
         matA(n*r, 0, size(A(r))) = A(r); // Regrouping the list of matrices in a single GPU matrix
     }
-
-    // Declaring GPU objects
-    viennacl::matrix_base<double> baseCL(A.n_elem, n, true);
-    viennacl::vector<double> vectorCL(n), resultCL(n*A.n_elem), cdtCL(A.n_elem);
-    viennacl::matrix<double, viennacl::column_major> matrixCL(n*A.n_elem, n);
-    viennacl::matrix<double, viennacl::row_major> prodCL(A.n_elem, n);
-    copy(matA, matrixCL);
-
-    int r;
-    for (int s = 0; s < (n_replicates + burn_in); ++s)
-    {
+    thrust::copy(matA.begin(), matA.end(), constraints.begin());
 
 
-        candidateO = candidateN;
-        thetaV = theta.col(s);
 
-        boundA = -(candidateO/thetaV);
-        boundB = (1 - candidateO)/thetaV;
+    // Rejection sampling
+    thrust::device_vector<double> theta(n, 0);
+    thrust::device_vector<double> boundA(n, 0), boundB(n, 0);
 
-        double leftQ = std::max(boundA.elem(arma::find(thetaV > 0)).max(),
-                                boundB.elem(arma::find(thetaV < 0)).max());
-        double rightQ = std::min(boundA.elem(arma::find(thetaV < 0)).min(),
-                                 boundB.elem(arma::find(thetaV > 0)).min());
-
-
-        for (int iter = 0; iter < n_iter; ++iter)
-        {
-            if (iter == n_iter) stop("The quadratic constraints cannot be satisfied");
-
-            double lambda = runif(1, leftQ, rightQ)[0];
-            candidateN = candidateO + lambda * thetaV;
-            candidateQ = Rcpp::as<arma::vec>(wrap(qnorm(as<NumericVector>(wrap(candidateN)), mu, sigma)));
-
-            viennacl::copy(candidateQ, vectorCL);
-            resultCL = viennacl::linalg::prod(matrixCL, vectorCL);
-
-            baseCL = viennacl::matrix_base<double> (resultCL.handle(),
-                                                    A.n_elem, 0, 1, A.n_elem,
-                                                    n, 0, 1, n,
-                                                    true);
-            prodCL = baseCL;
-            cdtCL = viennacl::linalg::prod(prodCL, vectorCL);
-
-            if (viennacl::linalg::min(cdtCL) >= 0) {
-                qsamples.col(s) = candidateQ;
-                break;
-            }
-
-        }
-
-
-    }
-
-    return qsamples.cols(burn_in, n_replicates + burn_in - 1);
+    return 1;
 }
