@@ -11,7 +11,7 @@
 #include <cstdlib>
 #define USECPSEC 1000000ULL
 
-long long ftime_usec(unsigned long long start){
+long long otime_usec(unsigned long long start){
 
   timeval tv;
   gettimeofday(&tv, 0);
@@ -19,7 +19,7 @@ long long ftime_usec(unsigned long long start){
 }
 
 #include <RcppArmadillo.h>
-#include <RcppArmadilloExtensions/sample.h>
+//#include <RcppArmadilloExtensions/sample.h>
 using namespace Rcpp;
 
 // ViennaCL headers
@@ -34,34 +34,34 @@ using namespace Rcpp;
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
-arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replicates,
-                  double mu = 0.0, double sigma = 1.0,
+arma::fmat sampleF(arma::field<arma::fmat> A, NumericVector initial, int n_replicates,
+                  float mu = 0.0, float sigma = 1.0,
                   int n_iter = 1.0e+5, int burn_in = 1.0e+3)
 {
 
     int n = initial.size();
-    arma::mat qsamples(n, n_replicates + burn_in, arma::fill::zeros);
-    arma::mat candidates(n, n_replicates + burn_in + 1, arma::fill::zeros);
-    arma::vec candidateO(n), candidateQ(n), candidateN = Rcpp::as<arma::vec>(wrap(pnorm(initial, mu, sigma)));
+    arma::fmat qsamples(n, n_replicates + burn_in, arma::fill::zeros);
+    arma::fmat candidates(n, n_replicates + burn_in + 1, arma::fill::zeros);
+    arma::fvec candidateO(n), candidateQ(n), candidateN = Rcpp::as<arma::fvec>(wrap(pnorm(initial, mu, sigma)));
 
     // Randomly sample in the sphere unit
-    arma::vec thetaV(n);
-    arma::mat theta(n, n_replicates + burn_in, arma::fill::randn);
+    arma::fvec thetaV(n);
+    arma::fmat theta(n, n_replicates + burn_in, arma::fill::randn);
     theta = arma::normalise(theta, 2, 0);
 
     // Rejection sampling
-    arma::vec::iterator l;
-    arma::vec boundA, boundB, cdt(A.n_elem), leftV(n), rightV(n);
-    arma::mat matA(n*A.n_elem, n);
+    arma::fvec::iterator l;
+    arma::fvec boundA, boundB, cdt(A.n_elem), leftV(n), rightV(n);
+    arma::fmat matA(n*A.n_elem, n);
     for (int r = 0; r < A.n_elem; ++r){
         matA(n*r, 0, size(A(r))) = A(r); // Regrouping the list of matrices in a single GPU matrix
     }
 
     // Declaring GPU objects
-    viennacl::matrix_base<double> baseCL(A.n_elem, n, true);
-    viennacl::vector<double> vectorCL(n), resultCL(n*A.n_elem), cdtCL(A.n_elem);
-    viennacl::matrix<double, viennacl::column_major> matrixCL(n*A.n_elem, n);
-    viennacl::matrix<double, viennacl::row_major> prodCL(A.n_elem, n);
+    viennacl::matrix_base<float> baseCL(A.n_elem, n, true);
+    viennacl::vector<float> vectorCL(n), resultCL(n*A.n_elem), cdtCL(A.n_elem);
+    viennacl::matrix<float, viennacl::column_major> matrixCL(n*A.n_elem, n);
+    viennacl::matrix<float, viennacl::row_major> prodCL(A.n_elem, n);
     copy(matA, matrixCL);
 
     int r;
@@ -75,25 +75,25 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
         boundA = -(candidateO/thetaV);
         boundB = (1 - candidateO)/thetaV;
 
-        //long long dt = ftime_usec(0);
-        double leftQ = std::max(boundA.elem(arma::find(thetaV > 0)).max(),
+        //long long dt = otime_usec(0);
+        float leftQ = std::max(boundA.elem(arma::find(thetaV > 0)).max(),
                                 boundB.elem(arma::find(thetaV < 0)).max());
-        double rightQ = std::min(boundA.elem(arma::find(thetaV < 0)).min(),
+        float rightQ = std::min(boundA.elem(arma::find(thetaV < 0)).min(),
                                  boundB.elem(arma::find(thetaV > 0)).min());
-        //dt = ftime_usec(dt);
+        //dt = otime_usec(dt);
         //std::cout << "bounds time: " << dt/(float)USECPSEC << "s" << std::endl;
 
         for (int iter = 0; iter < n_iter; ++iter)
         {
             if (iter == n_iter) stop("The quadratic constraints cannot be satisfied");
 
-            double lambda = runif(1, leftQ, rightQ)[0];
+            float lambda = runif(1, leftQ, rightQ)[0];
             candidateN = candidateO + lambda * thetaV;
-            candidateQ = Rcpp::as<arma::vec>(wrap(qnorm(as<NumericVector>(wrap(candidateN)), mu, sigma)));
+            candidateQ = Rcpp::as<arma::fvec>(wrap(qnorm(as<NumericVector>(wrap(candidateN)), mu, sigma)));
 
             viennacl::copy(candidateQ, vectorCL);
             resultCL = viennacl::linalg::prod(matrixCL, vectorCL);
-            baseCL = viennacl::matrix_base<double> (resultCL.handle(),
+            baseCL = viennacl::matrix_base<float> (resultCL.handle(),
                                                     A.n_elem, 0, 1, A.n_elem,
                                                     n, 0, 1, n,
                                                     true);
