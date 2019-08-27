@@ -4,10 +4,19 @@
 #define VIENNACL_WITH_OPENMP
 #define VIENNACL_WITH_ARMADILLO 1
 
-#include <ctime>
-#include <ratio>
-#include <chrono>
-using namespace std::chrono;
+// Timing headers
+#include <iostream>
+#include <time.h>
+#include <sys/time.h>
+#include <cstdlib>
+#define USECPSEC 1000000ULL
+
+long long ftime_usec(unsigned long long start){
+
+  timeval tv;
+  gettimeofday(&tv, 0);
+  return ((tv.tv_sec*USECPSEC)+tv.tv_usec)-start;
+}
 
 #include <RcppArmadillo.h>
 #include <RcppArmadilloExtensions/sample.h>
@@ -42,7 +51,7 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
 
     // Rejection sampling
     arma::vec::iterator l;
-    arma::vec boundA, boundB;
+    arma::vec boundA, boundB, cdt(A.n_elem), leftV(n), rightV(n);
     arma::mat matA(n*A.n_elem, n);
     for (int r = 0; r < A.n_elem; ++r){
         matA(n*r, 0, size(A(r))) = A(r); // Regrouping the list of matrices in a single GPU matrix
@@ -66,11 +75,19 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
         boundA = -(candidateO/thetaV);
         boundB = (1 - candidateO)/thetaV;
 
+        //leftV = boundA * (thetaV > 0) + boundB * (thetaV < 0);
+        //rightV = boundA * (thetaV < 0) + boundB * (thetaV > 0);
+
+        //double leftQ = leftV.max();
+        //double rightQ = rightV.min();
+
+        //long long dt = ftime_usec(0);
         double leftQ = std::max(boundA.elem(arma::find(thetaV > 0)).max(),
                                 boundB.elem(arma::find(thetaV < 0)).max());
         double rightQ = std::min(boundA.elem(arma::find(thetaV < 0)).min(),
                                  boundB.elem(arma::find(thetaV > 0)).min());
-
+        //dt = ftime_usec(dt);
+        //std::cout << "bounds time: " << dt/(float)USECPSEC << "s" << std::endl;
 
         for (int iter = 0; iter < n_iter; ++iter)
         {
@@ -82,15 +99,15 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
 
             viennacl::copy(candidateQ, vectorCL);
             resultCL = viennacl::linalg::prod(matrixCL, vectorCL);
-
             baseCL = viennacl::matrix_base<double> (resultCL.handle(),
                                                     A.n_elem, 0, 1, A.n_elem,
                                                     n, 0, 1, n,
                                                     true);
             prodCL = baseCL;
             cdtCL = viennacl::linalg::prod(prodCL, vectorCL);
+            viennacl::copy(cdtCL, cdt);
 
-            if (viennacl::linalg::min(cdtCL) >= 0) {
+            if (all(cdt >= 0)) {
                 qsamples.col(s) = candidateQ;
                 break;
             }

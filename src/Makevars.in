@@ -3,7 +3,7 @@ CXX_STD = CXX11
 PKG_CPPFLAGS = @GPURCUDA_CPPFLAGS@
 PKG_CXXFLAGS = @GPURCUDA_CXXFLAGS@
 
-PKG_LIBS = @GPURCUDA_LIBS@
+PKG_LIBS = @GPURCUDA_LIBS@ -L/site/rp/app/x86_64/tools/cuda/8.0/lib64 -Wl,-rpath,/site/rp/app/x86_64/tools/cuda/8.0/lib64 -lcublas
 R_LIBS = @R_LIBS@
 
 cu_sources := $(wildcard *.cu)

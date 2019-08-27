@@ -1,98 +1,125 @@
 #define ARMA_ALLOW_FAKE_GCC
 
-#define VIENNACL_WITH_CUDA
-#define VIENNACL_WITH_OPENMP
-#define VIENNACL_WITH_ARMADILLO 1
-
-#include <ctime>
-#include <ratio>
-#include <chrono>
-using namespace std::chrono;
-
 #include <RcppArmadillo.h>
 // #include <RcppArmadilloExtensions/sample.h>
 using namespace Rcpp;
 
-
-// Cuda headers
-#include <cuda.h>
-#include <curand.h>
-
-// Thrust headers
+// CUDA & Thrust headers
+#include <cublas_v2.h>
 #include <thrust/device_vector.h>
-#include <thrust/functional.h>
-#include <thrust/transform.h>
-#include <thrust/transform_reduce.h>
+#include <thrust/copy.h>
 
-#include <thrust/random/uniform_real_distribution.h>
+// Timing headers
+#include <iostream>
+#include <time.h>
+#include <sys/time.h>
+#include <cstdlib>
+#define USECPSEC 1000000ULL
 
+long long dtime_usec(unsigned long long start){
+
+  timeval tv;
+  gettimeofday(&tv, 0);
+  return ((tv.tv_sec*USECPSEC)+tv.tv_usec)-start;
+}
 
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
-template<class T>
-struct normcdf_f{
-    T mu;
-    T sigma;
-    normcdf_f(T _mu, T _sigma){
-        mu=_mu;
-        sigma=_sigma;
-    }
-    __host__ __device__ T operator()(T &x) const{
-        return normcdf((x-mu)/sigma);
-    }
-};
-
-template<class T>
-struct normcdfinv_f{
-    T mu;
-    T sigma;
-    normcdfinv_f(T _mu, T _sigma){
-        mu=_mu;
-        sigma=_sigma;
-    }
-    __host__ __device__ T operator()(T &x) const{
-        return (normcdfinv(x) * sigma + mu);
-    }
-};
-
-double sampleQ(arma::field<arma::mat> A, arma::vec initial, int n_replicates,
-                  const double mu = 0.0, const double sigma = 1.0,
+arma::mat sampleQ(arma::field<arma::mat> A, NumericVector initial, int n_replicates,
+                  double mu = 0.0, double sigma = 1.0,
                   int n_iter = 1.0e+5, int burn_in = 1.0e+3)
 {
-    // Setting the generator
-    curandGenerator_t gen;
-    curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
-    curandSetPseudoRandomGeneratorSeed(gen, 1234ULL);
 
-    // Functors
-    normcdf_f<double> normcdf_functor(mu, sigma);
-    normcdfinv_f<double> normcdfinv_functor(mu, sigma);
-
-    // Initialization
     int n = initial.size();
-    thrust::device_vector<double> candidateN(n), candidateQ(initial.begin(), initial.end());
-    thrust::device_vector<double> qsamples(n*(n_replicates + burn_in), 0);
-    thrust::device_vector<double> constraints(n*n*A.n_elem, 0);
+    arma::mat qsamples(n, n_replicates + burn_in, arma::fill::zeros);
+    arma::mat candidates(n, n_replicates + burn_in + 1, arma::fill::zeros);
+    arma::vec candidateO(n), candidateQ(n), candidateN = Rcpp::as<arma::vec>(wrap(pnorm(initial, mu, sigma)));
 
-    thrust::transform(candidateQ.begin(), candidateQ.end(), candidateN.begin(), normcdf_functor);
+    // Randomly sample in the sphere unit
+    arma::vec thetaV(n);
+    arma::mat theta(n, n_replicates + burn_in, arma::fill::randn);
+    theta = arma::normalise(theta, 2, 0);
 
+    // Rejection sampling
+    arma::vec::iterator l;
+    arma::vec boundA, boundB, cdt(n);
     arma::mat matA(n*A.n_elem, n);
     for (int r = 0; r < A.n_elem; ++r){
         matA(n*r, 0, size(A(r))) = A(r); // Regrouping the list of matrices in a single GPU matrix
     }
-    thrust::copy(matA.begin(), matA.end(), constraints.begin());
 
-    // sample a uniform vector
-    double leftQ = 0, rightQ = 1;
-    double lambda;
+    // Declaring GPU objects
+    double *matrixT;
+    cudaMalloc(&matrixT, n*n*A.n_elem * sizeof(double));
+    cudaMemcpy(matA.begin(), matrixT, n*n*A.n_elem * sizeof(double),cudaMemcpyHostToDevice);
 
-    /* Generate n floats on device */
-    curandGenerateUniform(gen, &lambda, 1);
+    double *resultT;
+    cudaMalloc(&resultT, n*A.n_elem * sizeof(double));
 
-    // Rejection sampling
-    thrust::device_vector<double> theta(n, 0);
-    thrust::device_vector<double> boundA(n, 0), boundB(n, 0);
+    double *vectorT;
+    cudaMalloc(&vectorT, n * sizeof(double));
 
-    return lambda;
+    double *cdtT;
+    cudaMalloc(&cdtT, A.n_elem * sizeof(double));
+
+    cublasHandle_t h;
+    cublasCreate(&h);
+    double alpha = 1.0, beta = 0.0;
+
+    int r;
+    for (int s = 0; s < (n_replicates + burn_in); ++s)
+    {
+
+
+        candidateO = candidateN;
+        thetaV = theta.col(s);
+
+        boundA = -(candidateO/thetaV);
+        boundB = (1 - candidateO)/thetaV;
+
+        double leftQ = std::max(boundA.elem(arma::find(thetaV > 0)).max(),
+                                boundB.elem(arma::find(thetaV < 0)).max());
+        double rightQ = std::min(boundA.elem(arma::find(thetaV < 0)).min(),
+                                 boundB.elem(arma::find(thetaV > 0)).min());
+
+
+        for (int iter = 0; iter < n_iter; ++iter)
+        {
+            if (iter == n_iter) stop("The quadratic constraints cannot be satisfied");
+            Rprintf("iteration == %d\n", iter);
+
+            double lambda = runif(1, leftQ, rightQ)[0];
+            candidateN = candidateO + lambda * thetaV;
+            candidateQ = Rcpp::as<arma::vec>(wrap(qnorm(as<NumericVector>(wrap(candidateN)), mu, sigma)));
+
+            cudaMemcpy(candidateQ.begin(), vectorT, n*sizeof(double),cudaMemcpyHostToDevice);
+            cudaDeviceSynchronize();
+            long long dt = dtime_usec(0);
+            cublasDgemm(h, CUBLAS_OP_N, CUBLAS_OP_N, n*A.n_elem, 1, n, &alpha,
+                        matrixT, n*A.n_elem, vectorT, n, &beta,
+                        resultT, n*A.n_elem);
+            cudaDeviceSynchronize();
+            cublasDgemm(h, CUBLAS_OP_N, CUBLAS_OP_N, 1, A.n_elem, n, &alpha,
+                        vectorT, 1, resultT, n, &beta,
+                        cdtT, 1);
+            cudaDeviceSynchronize();
+            dt = dtime_usec(dt);
+            std::cout << "GPU computation time: " << dt/(float)USECPSEC << "s" << std::endl;
+            cudaMemcpy(cdt.begin(), cdtT, A.n_elem * sizeof(double),cudaMemcpyDeviceToHost);
+
+            if (all(cdt >= 0)) {
+                qsamples.col(s) = candidateQ;
+                break;
+            }
+
+        }
+    }
+
+    cudaFree(matrixT);
+    cudaFree(resultT);
+    cudaFree(vectorT);
+    cudaFree(cdtT);
+
+    return qsamples.cols(burn_in, n_replicates + burn_in - 1);
 }
