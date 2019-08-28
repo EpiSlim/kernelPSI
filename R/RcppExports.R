@@ -193,10 +193,6 @@ sampleC <- function(A, initial, n_replicates, mu, sigma, n_iter, burn_in) {
     .Call(`_kernelPSI_sampleC`, A, initial, n_replicates, mu, sigma, n_iter, burn_in)
 }
 
-sampleF <- function(A, initial, n_replicates, mu, sigma, n_iter, burn_in) {
-    .Call(`_kernelPSI_sampleF`, A, initial, n_replicates, mu, sigma, n_iter, burn_in)
-}
-
 #' samples within the acceptance region defined by the kernel selection event
 #'
 #' To approximate the distribution of the test statistics, we iteratively
@@ -253,5 +249,9 @@ sampleF <- function(A, initial, n_replicates, mu, sigma, n_iter, burn_in) {
 #' @export
 sampleH <- function(A, initial, n_replicates, mu = 0.0, sigma = 1.0, n_iter = 1.0e+5, burn_in = 1.0e+3) {
     .Call(`_kernelPSI_sampleH`, A, initial, n_replicates, mu, sigma, n_iter, burn_in)
+}
+
+statC <- function(sample, replicates, K) {
+    .Call(`_kernelPSI_statC`, sample, replicates, K)
 }
 
