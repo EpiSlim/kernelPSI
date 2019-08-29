@@ -38,7 +38,7 @@ def ConvertSMVer2Cores(major, minor):
 
 
 def main():
-    libnames = ('libcuda.so', 'libcuda.dylib', 'cuda.dll')
+    libnames = ('libcuda.so.1', 'libcuda.so', 'libcuda.dylib', 'cuda.dll')
     for libname in libnames:
         try:
             cuda = ctypes.CDLL(libname)
