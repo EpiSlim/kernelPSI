@@ -48,7 +48,7 @@ double statC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     copy(statCL, stat);
     double statS = viennacl::linalg::inner_prod(viennacl::linalg::prod(hsicCL, sampleCL), sampleCL);
 
-    double pvalue = arma::sum(statS > stat)/ (double) replicates.n_cols;
+    double pvalue = arma::sum(stat > statS)/ (double) replicates.n_cols;
 
     return pvalue;
 }

@@ -129,9 +129,7 @@ fi
 R_INCL=`"${R_HOME}/bin/R" CMD config --cppflags`
 R_LIBS=`"${R_HOME}/bin/R" CMD config --ldflags`
 R_CPIC=`"${R_HOME}/bin/R" CMD config CPICFLAGS`
-
-
-
+CU_ARCH=`python src/arch_detect.py`
 
 AC_MSG_CHECKING("building the nvcc command line")
 NVCC="${CUDA_HOME}/bin/nvcc"
@@ -145,4 +143,5 @@ AC_SUBST(R_INCL)
 AC_SUBST(R_CPIC)
 AC_SUBST(R_LIBS)
 AC_SUBST(GPURCUDA_LIBS)
+AC_SUBST(CU_ARCH)
 AC_OUTPUT(src/Makevars)
