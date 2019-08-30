@@ -22,7 +22,7 @@ CU_ARGS += -Xcudafe --diag_suppress=code_is_unreachable
 CU_ARGS += -Xcudafe --diag_suppress=initialization_not_reachable
 CU_ARGS += -Xcudafe --diag_suppress=missing_initializer_on_const
 CU_ARGS += -Xcudafe --diag_suppress=declared_but_not_referenced
-CU_INCL = -I../inst/include/ @R_INCL@ @RCPP_INCL@ @THRUST_INCL@
+CU_INCL = -I../inst/include/ @R_INCL@ @RCPP_INCL@ 
 CU_ARCH = @CU_ARCH@
 
 CXX=@CXX@

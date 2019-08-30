@@ -111,7 +111,7 @@ AC_PROG_RSCRIPT
 
 if test x"${RSCRIPT}" == x"yes" ; then
 
-		R_HOME=`Rscript -e 'cat(R.home())'`
+		R_HOME=`${R_HOME}/bin/Rscript -e 'cat(R.home())'`
 
     rcpp_incl=`${R_HOME}/bin/Rscript -e 'Rcpp:::CxxFlags()'`
 		thrust_incl=`${R_HOME}/bin/Rscript -e 'cat(paste("-I", system.file("include", package = "thrust"), sep = ""))'`

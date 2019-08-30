@@ -2925,7 +2925,7 @@ fi
 
 if test x"${RSCRIPT}" == x"yes" ; then
 
-		R_HOME=`Rscript -e 'cat(R.home())'`
+		R_HOME=`${R_HOME}/bin/Rscript -e 'cat(R.home())'`
 
     rcpp_incl=`${R_HOME}/bin/Rscript -e 'Rcpp:::CxxFlags()'`
 		thrust_incl=`${R_HOME}/bin/Rscript -e 'cat(paste("-I", system.file("include", package = "thrust"), sep = ""))'`
@@ -2946,9 +2946,6 @@ R_INCL=`"${R_HOME}/bin/R" CMD config --cppflags`
 R_LIBS=`"${R_HOME}/bin/R" CMD config --ldflags`
 R_CPIC=`"${R_HOME}/bin/R" CMD config CPICFLAGS`
 CU_ARCH=`python src/arch_detect.py`
-
-
-
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"building the nvcc command line\"" >&5
 $as_echo_n "checking \"building the nvcc command line\"... " >&6; }
@@ -4121,3 +4118,4 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
+

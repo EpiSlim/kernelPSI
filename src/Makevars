@@ -22,7 +22,7 @@ CU_ARGS += -Xcudafe --diag_suppress=code_is_unreachable
 CU_ARGS += -Xcudafe --diag_suppress=initialization_not_reachable
 CU_ARGS += -Xcudafe --diag_suppress=missing_initializer_on_const
 CU_ARGS += -Xcudafe --diag_suppress=declared_but_not_referenced
-CU_INCL = -I../inst/include/ -I/site/rp/app/x86_64/discovery/R/RHEL7/3.5.0/lib64/R/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/Rcpp/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/thrust/include
+CU_INCL = -I../inst/include/ -I/site/rp/app/x86_64/discovery/R/RHEL7/3.5.0/lib64/R/include -I/site/rp/work/users/I0302571/R/Rlibs/3.5.0/Rcpp/include 
 CU_ARCH =  -gencode arch=compute_35,code=sm_35 -gencode arch=compute_50,code=sm_50
 
 CXX=g++
