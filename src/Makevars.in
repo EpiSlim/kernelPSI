@@ -14,7 +14,7 @@ cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
 
 OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
 
-R_INC = -I../inst/include @R_INCL@ @RCPP_INCL@ @THRUST_INCL@ @CU_INCL@
+R_INC = -I../inst/include @R_INCL@ @RCPP_INCL@ @CU_INCL@
 CXX_ARGS = @R_CPIC@
 
 CU_ARGS := -Xcompiler -fPIC -std=c++11
