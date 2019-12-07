@@ -31,6 +31,7 @@ stat.anova <- anovaLR(X, Y)
 
 }
 \seealso{
-Other LR test: \code{\link{maxLR}}
+Other LR test: 
+\code{\link{maxLR}()}
 }
 \concept{LR test}

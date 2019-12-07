@@ -33,6 +33,7 @@ stat.likelihood <- maxLR(X, Y)
 
 }
 \seealso{
-Other LR test: \code{\link{anovaLR}}
+Other LR test: 
+\code{\link{anovaLR}()}
 }
 \concept{LR test}
