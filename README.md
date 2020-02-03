@@ -3,6 +3,14 @@
 
 # kernelPSI
 
+[![Rdoc](http://www.rdocumentation.org/badges/version/kernelPSI)](http://www.rdocumentation.org/packages/kernelPSI)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/kernelPSI)](https://cran.r-project.org/package=kernelPSI)
+[![Travis build
+status](https://travis-ci.org/EpiSlim/kernelPSI.svg?branch=master)](https://travis-ci.org/EpiSlim/kernelPSI)
+![CRAN Downloads
+overall](https://cranlogs.r-pkg.org/badges/grand-total/kernelPSI)
+
 This package implements an exhaustive framework to perform
 post-selection inference with kernels.
 
