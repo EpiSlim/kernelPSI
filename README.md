@@ -47,6 +47,16 @@ install.packages("devtools")
 devtools::install_github("EpiSlim/kernelPSI")
 ```
 
+To install the GPU version, first define the environment variable
+<span style="color:green"> `CUDA_HOME` </span> which points to the
+directory of the installed CUDA toolkit, and then enter the following
+commands in your R console:
+
+``` r
+install.packages("devtools")
+devtools::install_github("EpiSlim/kernelPSI", ref = "GPU")
+```
+
 ## Usage examples
 
 We illustrate the use of `kernelPSI` on a toy example. For the sake of
