@@ -1,0 +1,41 @@
+CXX_STD = CXX11
+
+PKG_CPPFLAGS = @GPURCUDA_CPPFLAGS@
+PKG_CXXFLAGS = @GPURCUDA_CXXFLAGS@
+
+PKG_LIBS = @GPURCUDA_LIBS@
+R_LIBS = @R_LIBS@
+
+cu_sources := $(wildcard *.cu)
+cu_sharedlibs := $(patsubst %.cu, %.o, $(cu_sources))
+
+cpp_sources := $(wildcard *.cpp)
+cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
+
+OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
+
+R_INC = -I../inst/include @R_INCL@ @RCPP_INCL@ @CU_INCL@
+CXX_ARGS = @R_CPIC@
+
+CU_ARGS := -Xcompiler -fPIC -std=c++11
+CU_ARGS += -Xcudafe --diag_suppress=code_is_unreachable
+CU_ARGS += -Xcudafe --diag_suppress=initialization_not_reachable
+CU_ARGS += -Xcudafe --diag_suppress=missing_initializer_on_const
+CU_ARGS += -Xcudafe --diag_suppress=declared_but_not_referenced
+CU_INCL = -I../inst/include/ @R_INCL@ @RCPP_INCL@ 
+CU_ARCH = @CU_ARCH@
+
+CXX=@CXX@
+NVCC=@NVCC@
+
+all: kernelPSI.so
+
+kernelPSI.so: $(OBJECTS)
+
+%.o: %.cpp $(cpp_sources)
+	$(CXX) $(CXX_ARGS) $(R_INC) -c $< -o $@
+%.o: %.cu $(cu_sources)
+	$(NVCC) $(CU_ARCH) -DGPU -x cu -c $(CU_ARGS) $(CU_INCL) -c $< -o $@
+
+clean:
+	@rm -rf *.o *.so *.dll
