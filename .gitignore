@@ -11,5 +11,6 @@ kernelPSI.Rproj
 config.log
 config.status
 autom4te.cache/
+.vscode/
 doc
 Meta
