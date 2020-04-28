@@ -51,7 +51,7 @@ elif test "$BACKEND" = "CUDA"; then
 				#AC_SUBST(CUDA_LIBDIR,["$cu_libdir"])
 		fi
 
-		GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -l"
+		GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas"
 		BACKEND="CUDA"
 		AC_SUBST(BACKEND)
 else

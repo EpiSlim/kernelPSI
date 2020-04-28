@@ -40,7 +40,7 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
 
     // CUDA section
     cublasHandle_t handle;
-    cublasStatus_t stat = cublasCreate( &handle );
+    cublasStatus_t statHandle = cublasCreate( &handle );
 
     double *hsicCUDA, *replicatesCUDA, *prodCUDA, *sampleCUDA;
 
@@ -67,7 +67,7 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
         hsicCUDA, n,
         replicatesCUDA, replicates.n_rows,
         &beta,
-        prodCUDA, n)
+        prodCUDA, n);
     
     cudaDeviceSynchronize();
     
