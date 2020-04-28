@@ -30,13 +30,37 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     for (int r = 0; r < K.n_elem; ++r){
        Ksum += K(r);
     }
+    Ksum = quadHSIC(Ksum);
+
+
+    // CUDA section
+    double* hsicCUDA, replicatesCUDA, prodCUDA, sampleCUDA;
+
+    // Allocate all our host-side (CPU) and device-side (GPU) data
+    cudaMallocManaged( (void **)&hsicCUDA, n * n * sizeof( double ));
+    cudaMallocManaged( (void **)&replicatesCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ));
+    cudaMallocManaged( (void **)&prodCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ));
+    cudaMallocManaged( (void **)&sampleCUDA, n * sizeof( double ));
+
+    // Copy data to CUDA objects
+    cudaMemcpy(hsicCUDA, Ksum.memptr(), count = n * n * sizeof( double ), kind = cudaMemcpyHostToDevice);
+    cudaMemcpy(replicatesCUDA, replicates.memptr(), count = replicates.n_rows * replicates.n_cols * sizeof( double ), 
+                kind = cudaMemcpyHostToDevice);
+    cudaMemcpy(sampleCUDA, sample.memptr(), count = n * sizeof( double ), kind = cudaMemcpyHostToDevice); 
+
+    // Free resources
+    cudaFree( hsicCUDA );
+    cudaFree( replicatesCUDA );
+    cudaFree( prodCUDA );
+    cudaFree( sampleCUDA );
+
 
     // Transfer data to GPU
     viennacl::matrix<double> hsicCL(n, n);
     viennacl::matrix<double> replicatesCL(replicates.n_rows, replicates.n_cols), prodCL(replicates.n_rows, replicates.n_cols);
     viennacl::vector<double> sampleCL(n);
 
-    copy(quadHSIC(Ksum), hsicCL);
+    copy(Ksum, hsicCL);
     copy(replicates, replicatesCL);
     copy(sample, sampleCL);
 
