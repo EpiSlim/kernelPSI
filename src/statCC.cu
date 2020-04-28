@@ -21,6 +21,7 @@ using namespace Rcpp;
 // CUDA headers
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include "cublas_v2.h"
 
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(RcppArmadillo)]]
@@ -38,6 +39,9 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
 
 
     // CUDA section
+    cublasHandle_t handle;
+    cublasStatus_t stat = cublasCreate( &handle );
+
     double *hsicCUDA, *replicatesCUDA, *prodCUDA, *sampleCUDA;
 
     // Allocate all our host-side (CPU) and device-side (GPU) data
@@ -52,10 +56,24 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
                 cudaMemcpyHostToDevice);
     cudaMemcpy(sampleCUDA, sample.memptr(), n * sizeof( double ), cudaMemcpyHostToDevice); 
 
-    // Computing the statistic
-    
+    // Set these constants so we get a simple matrix multiply with cublasDgemm
+    double alpha = 1.0;
+    double beta  = 0.0;
 
+    // Computing the statistic
+    cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
+        n, replicates.n_cols, n,
+        &alpha,
+        hsicCUDA, n,
+        replicatesCUDA, replicates.n_rows,
+        &beta,
+        prodCUDA, n)
+    
+    cudaDeviceSynchronize();
+    
     // Free resources
+    cublasDestroy( handle );
+
     cudaFree( hsicCUDA );
     cudaFree( replicatesCUDA );
     cudaFree( prodCUDA );
