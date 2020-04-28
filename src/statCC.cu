@@ -47,10 +47,10 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     cudaMallocManaged(&sampleCUDA, n * sizeof( double ));
 
     // Copy data to CUDA objects
-    //cudaMemcpy(hsicCUDA, Ksum.memptr(), n * n * sizeof( double ), cudaMemcpyHostToDevice);
-    //cudaMemcpy(replicatesCUDA, replicates.memptr(), replicates.n_rows * replicates.n_cols * sizeof( double ), 
-    //            cudaMemcpyHostToDevice);
-    //cudaMemcpy(sampleCUDA, sample.memptr(), n * sizeof( double ), cudaMemcpyHostToDevice); 
+    cudaMemcpy(hsicCUDA, Ksum.memptr(), n * n * sizeof( double ), cudaMemcpyHostToDevice);
+    cudaMemcpy(replicatesCUDA, replicates.memptr(), replicates.n_rows * replicates.n_cols * sizeof( double ), 
+                cudaMemcpyHostToDevice);
+    cudaMemcpy(sampleCUDA, sample.memptr(), n * sizeof( double ), cudaMemcpyHostToDevice); 
 
     // Computing the statistic
     
