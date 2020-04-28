@@ -5,8 +5,7 @@
 \title{generates a closure for the computation of the likelihood ratio statistic
 for the ridge prototype.}
 \usage{
-ridgeLR(K, mu = 0, sigma = 1, lambda = 1, tol = 1e-06,
-  n_iter = 10000)
+ridgeLR(K, mu = 0, sigma = 1, lambda = 1, tol = 1e-06, n_iter = 10000)
 }
 \arguments{
 \item{K}{a single or a list of selected kernel similarity matrices.}
@@ -60,6 +59,7 @@ of the American Statistical Association, 113(521), 280–293.
 \seealso{
 \code{\link{pcaLR}}
 
-Other prototype: \code{\link{pcaLR}}
+Other prototype: 
+\code{\link{pcaLR}()}
 }
 \concept{prototype}

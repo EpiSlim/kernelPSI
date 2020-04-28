@@ -10,7 +10,7 @@
 using namespace std::chrono;
 
 #include <RcppArmadillo.h>
-#include <RcppArmadilloExtensions/sample.h>
+//#include <RcppArmadilloExtensions/sample.h>
 using namespace Rcpp;
 
 // ViennaCL headers

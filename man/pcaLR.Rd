@@ -39,6 +39,7 @@ Kernel PCA for feature extraction and de-noising in nonlinear regression.
 Neural Computing and Applications, 10(3), 231–243.
 }
 \seealso{
-Other prototype: \code{\link{ridgeLR}}
+Other prototype: 
+\code{\link{ridgeLR}()}
 }
 \concept{prototype}
