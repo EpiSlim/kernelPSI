@@ -5,8 +5,17 @@
 \title{computes a valid significance value for the effect of the selected kernels
 on the outcome}
 \usage{
-kernelPSI(Y, K_select, constraints, method = "all", mu = 0,
-  sigma = 1, lambda = 1, n_replicates = 5000, burn_in = 1000)
+kernelPSI(
+  Y,
+  K_select,
+  constraints,
+  method = "all",
+  mu = 0,
+  sigma = 1,
+  lambda = 1,
+  n_replicates = 5000,
+  burn_in = 1000
+)
 }
 \arguments{
 \item{Y}{the response vector}

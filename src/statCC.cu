@@ -18,9 +18,13 @@ using namespace Rcpp;
 
 #include "hsic.h"
 
+// CUDA headers
+#include <cuda.h>
+#include <cuda_runtime.h>
 
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(RcppArmadillo)]]
+
 double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
 
     // Compute the sum kernel
@@ -34,19 +38,19 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
 
 
     // CUDA section
-    double* hsicCUDA, replicatesCUDA, prodCUDA, sampleCUDA;
+    double *hsicCUDA, *replicatesCUDA, *prodCUDA, *sampleCUDA;
 
     // Allocate all our host-side (CPU) and device-side (GPU) data
-    cudaMallocManaged( (void **)&hsicCUDA, n * n * sizeof( double ));
-    cudaMallocManaged( (void **)&replicatesCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ));
-    cudaMallocManaged( (void **)&prodCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ));
-    cudaMallocManaged( (void **)&sampleCUDA, n * sizeof( double ));
+    cudaMallocManaged(&hsicCUDA, n * n * sizeof( double ));
+    cudaMallocManaged(&replicatesCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ));
+    cudaMallocManaged(&prodCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ));
+    cudaMallocManaged(&sampleCUDA, n * sizeof( double ));
 
     // Copy data to CUDA objects
-    cudaMemcpy(hsicCUDA, Ksum.memptr(), count = n * n * sizeof( double ), kind = cudaMemcpyHostToDevice);
-    cudaMemcpy(replicatesCUDA, replicates.memptr(), count = replicates.n_rows * replicates.n_cols * sizeof( double ), 
-                kind = cudaMemcpyHostToDevice);
-    cudaMemcpy(sampleCUDA, sample.memptr(), count = n * sizeof( double ), kind = cudaMemcpyHostToDevice); 
+    //cudaMemcpy(hsicCUDA, Ksum.memptr(), n * n * sizeof( double ), cudaMemcpyHostToDevice);
+    //cudaMemcpy(replicatesCUDA, replicates.memptr(), replicates.n_rows * replicates.n_cols * sizeof( double ), 
+    //            cudaMemcpyHostToDevice);
+    //cudaMemcpy(sampleCUDA, sample.memptr(), n * sizeof( double ), cudaMemcpyHostToDevice); 
 
     // Computing the statistic
     
