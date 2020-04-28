@@ -23,6 +23,15 @@ using namespace Rcpp;
 #include <cuda_runtime.h>
 #include "cublas_v2.h"
 
+__global__ 
+void cuda_element_prod(int n, double *x, double *y)
+{
+  int index = blockIdx.x * blockDim.x + threadIdx.x;
+  int stride = blockDim.x * gridDim.x;
+  for (int i = index; i < n; i += stride)
+    x[i] *= y[i];
+}
+
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
@@ -68,6 +77,10 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
         replicatesCUDA, replicates.n_rows,
         &beta,
         prodCUDA, n);
+
+    int blockSize = 256;
+    int numBlocks = (replicates.n_rows * replicates.n_cols + blockSize - 1) / blockSize;
+    cuda_element_prod<<<numBlocks, blockSize>>>(replicates.n_rows * replicates.n_cols, prodCUDA, replicatesCUDA);
     
     cudaDeviceSynchronize();
     
