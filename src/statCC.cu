@@ -48,6 +48,9 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
                 kind = cudaMemcpyHostToDevice);
     cudaMemcpy(sampleCUDA, sample.memptr(), count = n * sizeof( double ), kind = cudaMemcpyHostToDevice); 
 
+    // Computing the statistic
+    
+
     // Free resources
     cudaFree( hsicCUDA );
     cudaFree( replicatesCUDA );
