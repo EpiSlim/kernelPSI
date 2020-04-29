@@ -111,6 +111,8 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     cudaFree( replicatesCUDA );
     cudaFree( prodCUDA );
     cudaFree( sampleCUDA );
+    cudaFree( tmpCUDA );
+    cudaFree( statSS );
 
 
     // Transfer data to GPU
