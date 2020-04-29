@@ -3,8 +3,8 @@ CXX_STD = CXX11
 PKG_CPPFLAGS = -I. -I../inst/include
 PKG_CXXFLAGS = 
 
-PKG_LIBS =  -L/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -Wl,-rpath,/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -lcudart
-R_LIBS = 
+PKG_LIBS =  -L/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -Wl,-rpath,/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -lcudart -lcublas
+R_LIBS = -Wl,--export-dynamic -fopenmp -L/cbio/donnees/lslim/.linuxbrew/opt/gettext/lib -L/cbio/donnees/lslim/.linuxbrew/opt/readline/lib -L/cbio/donnees/lslim/.linuxbrew/lib -L/cbio/donnees/lslim/.linuxbrew/opt/gettext/lib -L/cbio/donnees/lslim/.linuxbrew/opt/readline/lib -L/cbio/donnees/lslim/.linuxbrew/lib -L/cbio/donnees/lslim/.linuxbrew/Cellar/r/4.0.0/lib/R/lib -lR -L/cbio/donnees/lslim/.linuxbrew/Cellar/pcre2/10.34/lib -lpcre2-8 -llzma -lbz2 -lz -lrt -ldl -lm -licuuc -licui18n
 
 cu_sources := $(wildcard *.cu)
 cu_sharedlibs := $(patsubst %.cu, %.o, $(cu_sources))
@@ -14,16 +14,16 @@ cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
 
 OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
 
-R_INC = -I../inst/include   
-CXX_ARGS = 
+R_INC = -I../inst/include -I/cbio/donnees/lslim/.linuxbrew/Cellar/r/4.0.0/lib/R/include -I/cbio/donnees/lslim/.linuxbrew/lib/R/4.0/site-library/Rcpp/include 
+CXX_ARGS = -fpic
 
 CU_ARGS := -Xcompiler -fPIC -std=c++11
 CU_ARGS += -Xcudafe --diag_suppress=code_is_unreachable
 CU_ARGS += -Xcudafe --diag_suppress=initialization_not_reachable
 CU_ARGS += -Xcudafe --diag_suppress=missing_initializer_on_const
 CU_ARGS += -Xcudafe --diag_suppress=declared_but_not_referenced
-CU_INCL = -I../inst/include/   
-CU_ARCH = 
+CU_INCL = -I../inst/include/ -I/cbio/donnees/lslim/.linuxbrew/Cellar/r/4.0.0/lib/R/include -I/cbio/donnees/lslim/.linuxbrew/lib/R/4.0/site-library/Rcpp/include 
+CU_ARCH =  -gencode arch=compute_37,code=sm_37
 
 CXX=g++
 NVCC=/cm/shared/apps/cuda10.0/toolkit/10.0.130/bin/nvcc
