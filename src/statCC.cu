@@ -58,10 +58,10 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     // Allocate all our host-side (CPU) and device-side (GPU) data
     cudaMallocManaged(&hsicCUDA, n * n * sizeof( double ));
     cudaMallocManaged(&replicatesCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ));
-    cudaMallocManaged(&prodCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ));
     cudaMallocManaged(&sampleCUDA, n * sizeof( double ));
     cudaMallocManaged(&statCUDA, replicates.n_cols * sizeof( double ));
     cudaMallocManaged(&statS, sizeof( double ));
+    cudaMalloc(&prodCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ));
     cudaMalloc(&tmpCUDA, n * sizeof( double ));
 
     // Copy data to CUDA objects
