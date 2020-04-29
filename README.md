@@ -3,6 +3,14 @@
 
 # kernelPSI
 
+[![Rdoc](http://www.rdocumentation.org/badges/version/kernelPSI)](http://www.rdocumentation.org/packages/kernelPSI)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/kernelPSI)](https://cran.r-project.org/package=kernelPSI)
+[![Travis build
+status](https://travis-ci.org/EpiSlim/kernelPSI.svg?branch=master)](https://travis-ci.org/EpiSlim/kernelPSI)
+![CRAN Downloads
+overall](https://cranlogs.r-pkg.org/badges/grand-total/kernelPSI)
+
 This package implements an exhaustive framework to perform
 post-selection inference with kernels.
 
@@ -37,6 +45,16 @@ The latest version is directly available from [GitHub](https://github.com):
 ``` r
 install.packages("devtools")
 devtools::install_github("EpiSlim/kernelPSI")
+```
+
+To install the GPU version, first define the environment variable
+<span style="color:green"> `CUDA_HOME` </span> which points to the
+directory of the installed CUDA toolkit, and then enter the following
+commands in your R console:
+
+``` r
+install.packages("devtools")
+devtools::install_github("EpiSlim/kernelPSI", ref = "GPU")
 ```
 
 ## Usage examples
