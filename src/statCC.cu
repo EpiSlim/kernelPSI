@@ -102,7 +102,7 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
         1, 1, n,
         &alpha,
         tmpCUDA, 1,
-        sampleCUDA, 1,
+        sampleCUDA, n,
         &beta,
         statS, 1);
     
@@ -111,7 +111,7 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     cudaMemcpy(stat.memptr(), sampleCUDA, replicates.n_cols * sizeof( double ), cudaMemcpyDeviceToHost);
 
     // Compute p-value
-    double pvalue = arma::sum(stat > &statS)/ (double) replicates.n_cols;
+    double pvalue = arma::sum(stat > *statS)/ (double) replicates.n_cols;
 
     
     // Free resources
