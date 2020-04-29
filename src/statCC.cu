@@ -106,7 +106,7 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
         hsicCUDA, n,
         sampleCUDA, n,
         &beta,
-        tmpCUDA, n)
+        tmpCUDA, n);
 
     cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
         1, 1, n,
@@ -114,7 +114,7 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
         tmpCUDA, 1,
         sampleCUDA, 1,
         &beta,
-        statSS, 1)
+        statSS, 1);
     
     cudaDeviceSynchronize();
     
