@@ -51,13 +51,16 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     cublasHandle_t handle;
     cublasStatus_t statHandle = cublasCreate( &handle );
 
-    double *hsicCUDA, *replicatesCUDA, *prodCUDA, *sampleCUDA;
+    double *hsicCUDA, *replicatesCUDA, *prodCUDA, *sampleCUDA, *tmpCUDA, *statCUDA, *statSS;
+
 
     // Allocate all our host-side (CPU) and device-side (GPU) data
     cudaMallocManaged(&hsicCUDA, n * n * sizeof( double ));
     cudaMallocManaged(&replicatesCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ));
     cudaMallocManaged(&prodCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ));
     cudaMallocManaged(&sampleCUDA, n * sizeof( double ));
+    cudaMallocManaged(&tmpCUDA, n * sizeof( double ));
+    cudaMallocManaged(&statSS, sizeof( double ));
 
     // Copy data to CUDA objects
     cudaMemcpy(hsicCUDA, Ksum.memptr(), n * n * sizeof( double ), cudaMemcpyHostToDevice);
@@ -69,7 +72,7 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     double alpha = 1.0;
     double beta  = 0.0;
 
-    // Computing the statistic
+    // Computing the statistic for replicates
     cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
         n, replicates.n_cols, n,
         &alpha,
@@ -81,6 +84,23 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     int blockSize = 256;
     int numBlocks = (replicates.n_rows * replicates.n_cols + blockSize - 1) / blockSize;
     cuda_element_prod<<<numBlocks, blockSize>>>(replicates.n_rows * replicates.n_cols, prodCUDA, replicatesCUDA);
+
+    // Computing statistic for original sample
+    cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
+        n, 1, n,
+        &alpha,
+        hsicCUDA, n,
+        sampleCUDA, n,
+        &beta,
+        tmpCUDA, n)
+
+    cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
+        1, 1, n,
+        &alpha,
+        tmpCUDA, 1,
+        sampleCUDA, 1,
+        &beta,
+        statSS, 1)
     
     cudaDeviceSynchronize();
     
