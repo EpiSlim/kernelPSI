@@ -1,20 +1,8 @@
 #define ARMA_ALLOW_FAKE_GCC
 
-#define VIENNACL_WITH_CUDA
-#define VIENNACL_WITH_OPENMP
-#define VIENNACL_WITH_ARMADILLO 1
-
 #include <RcppArmadillo.h>
 // #include <RcppArmadilloExtensions/sample.h>
 using namespace Rcpp;
-
-// ViennaCL headers
-#include "viennacl/vector.hpp"
-#include "viennacl/matrix.hpp"
-#include "viennacl/forwards.h"
-#include "viennacl/matrix_proxy.hpp"
-#include "viennacl/linalg/inner_prod.hpp"
-#include "viennacl/linalg/sum.hpp"
 
 #include "hsic.h"
 
@@ -23,6 +11,8 @@ using namespace Rcpp;
 #include <cuda_runtime.h>
 #include "cublas_v2.h"
 
+
+// CUDA kernels
 __global__ 
 void cuda_element_prod(int n, double *x, double *y)
 {
@@ -62,7 +52,7 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     cublasHandle_t handle;
     cublasStatus_t statHandle = cublasCreate( &handle );
 
-    double *hsicCUDA, *replicatesCUDA, *prodCUDA, *sampleCUDA, *tmpCUDA, *statCUDA, *statSS;
+    double *hsicCUDA, *replicatesCUDA, *prodCUDA, *sampleCUDA, *tmpCUDA, *statCUDA, *statS;
 
 
     // Allocate all our host-side (CPU) and device-side (GPU) data
@@ -72,7 +62,7 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     cudaMallocManaged(&sampleCUDA, n * sizeof( double ));
     cudaMallocManaged(&tmpCUDA, n * sizeof( double ));
     cudaMallocManaged(&statCUDA, replicates.n_cols * sizeof( double ));
-    cudaMallocManaged(&statSS, sizeof( double ));
+    cudaMallocManaged(&statS, sizeof( double ));
 
     // Copy data to CUDA objects
     cudaMemcpy(hsicCUDA, Ksum.memptr(), n * n * sizeof( double ), cudaMemcpyHostToDevice);
@@ -106,7 +96,7 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
         hsicCUDA, n,
         sampleCUDA, n,
         &beta,
-        tmpCUDA, n)
+        tmpCUDA, n);
 
     cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
         1, 1, n,
@@ -114,9 +104,15 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
         tmpCUDA, 1,
         sampleCUDA, 1,
         &beta,
-        statSS, 1)
+        statS, 1);
     
     cudaDeviceSynchronize();
+
+    cudaMemcpy(stat.memptr(), sampleCUDA, replicates.n_cols * sizeof( double ), cudaMemcpyDeviceToHost);
+
+    // Compute p-value
+    double pvalue = arma::sum(stat > &statS)/ (double) replicates.n_cols;
+
     
     // Free resources
     cublasDestroy( handle );
@@ -127,27 +123,7 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     cudaFree( sampleCUDA );
     cudaFree( tmpCUDA );
     cudaFree( statCUDA );
-    cudaFree( statSS );
-
-
-    // Transfer data to GPU
-    viennacl::matrix<double> hsicCL(n, n);
-    viennacl::matrix<double> replicatesCL(replicates.n_rows, replicates.n_cols), prodCL(replicates.n_rows, replicates.n_cols);
-    viennacl::vector<double> sampleCL(n);
-
-    copy(Ksum, hsicCL);
-    copy(replicates, replicatesCL);
-    copy(sample, sampleCL);
-
-    // Compute the statistic
-    prodCL = viennacl::linalg::prod(hsicCL, replicatesCL);
-    prodCL = viennacl::linalg::element_prod(prodCL, replicatesCL);
-    viennacl::vector<double> statCL = viennacl::linalg::column_sum(prodCL);
-
-    copy(statCL, stat);
-    double statS = viennacl::linalg::inner_prod(viennacl::linalg::prod(hsicCL, sampleCL), sampleCL);
-
-    double pvalue = arma::sum(stat > statS)/ (double) replicates.n_cols;
+    cudaFree( statS );
 
     return pvalue;
 }
