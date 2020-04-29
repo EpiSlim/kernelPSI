@@ -83,10 +83,10 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
         &beta,
         prodCUDA, n);
 
-    int blockSize = 256;
+    int blockSize = 1024;
     int numBlocks = (replicates.n_rows * replicates.n_cols + blockSize - 1) / blockSize;
     cuda_element_prod<<<numBlocks, blockSize>>>(replicates.n_rows * replicates.n_cols, prodCUDA, replicatesCUDA);
-    cuda_column_sum<<<numBlocks, blockSize>>>(replicates.n_rows, replicates.n_cols, sampleCUDA, prodCUDA);
+    cuda_column_sum<<<numBlocks, blockSize>>>(replicates.n_rows, replicates.n_cols, statCUDA, prodCUDA);
 
 
     // Computing statistic for original sample
@@ -108,11 +108,10 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     
     cudaDeviceSynchronize();
 
-    cudaMemcpy(stat.memptr(), sampleCUDA, replicates.n_cols * sizeof( double ), cudaMemcpyDeviceToHost);
+    cudaMemcpy(stat.memptr(), statCUDA, replicates.n_cols * sizeof( double ), cudaMemcpyHostToHost);
 
     // Compute p-value
     double pvalue = arma::sum(stat > *statS)/ (double) replicates.n_cols;
-
     
     // Free resources
     cublasDestroy( handle );
