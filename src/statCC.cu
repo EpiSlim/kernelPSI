@@ -37,9 +37,6 @@ void cuda_column_sum(int n, int p, double *x, double *y)
 // [[Rcpp::depends(RcppArmadillo)]]
 
 double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
-    // Determine Id of assigned GPU
-    int deviceId;
-    cudaGetDevice(&deviceId);
 
     // Compute the sum kernel
     int n = sample.size();
@@ -63,15 +60,9 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     cudaMallocManaged(&replicatesCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ));
     cudaMallocManaged(&prodCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ));
     cudaMallocManaged(&sampleCUDA, n * sizeof( double ));
-    cudaMallocManaged(&tmpCUDA, n * sizeof( double ));
     cudaMallocManaged(&statCUDA, replicates.n_cols * sizeof( double ));
     cudaMallocManaged(&statS, sizeof( double ));
-
-    // Copy data to CUDA objects
-    cudaMemPrefetchAsync(hsicCUDA, n * n * sizeof( double ), deviceId);
-    cudaMemPrefetchAsync(replicatesCUDA, replicates.n_rows * replicates.n_cols * sizeof( double ), 
-                deviceId);
-    cudaMemPrefetchAsync(sampleCUDA, n * sizeof( double ), deviceId); 
+    cudaMalloc(&tmpCUDA, n * sizeof( double ));
 
     // Copy data to CUDA objects
     cudaMemcpy(hsicCUDA, Ksum.memptr(), n * n * sizeof( double ), cudaMemcpyHostToDevice);
@@ -117,7 +108,6 @@ double statCC(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K){
     
     cudaDeviceSynchronize();
 
-    cudaMemPrefetchAsync(statCUDA, replicates.n_cols * sizeof( double ), cudaCpuDeviceId);
     cudaMemcpy(stat.memptr(), statCUDA, replicates.n_cols * sizeof( double ), cudaMemcpyHostToHost);
 
     // Compute p-value
