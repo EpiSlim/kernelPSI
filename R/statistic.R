@@ -114,7 +114,7 @@ pcaLR <- function(K, mu = 0, sigma = 1) {
     Ksum <- K
   }
 
-  if (class(Ksum) != "kernelMatrix") {
+  if (all(class(Ksum) != "kernelMatrix")) {
     Ksum <- kernlab::as.kernelMatrix(Ksum, center = FALSE)
   }
 
