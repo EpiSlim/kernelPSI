@@ -122,7 +122,7 @@ __host__ double cuda_find_max(const double *d_data, const int data_len) {
   double *d_extrm;
   cudaMallocManaged((void **)&d_extrm, sizeof(double) * blocks_per_grid);
 
-  cuda_max_reduce<BLKSZ, SIGN>
+  cuda_max_reduce<SIGN, BLKSZ>
       <<<blocks_per_grid, thread_per_block>>>(d_data, data_len, d_extrm);
 
   cudaDeviceSynchronize();

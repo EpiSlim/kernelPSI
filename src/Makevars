@@ -3,7 +3,7 @@ CXX_STD = CXX11
 PKG_CPPFLAGS = -I. -I../inst/include
 PKG_CXXFLAGS = 
 
-PKG_LIBS =  -L/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -Wl,-rpath,/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -lcudart -lcublas
+PKG_LIBS =  -L/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -Wl,-rpath,/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -lcudart -lcublas -lcurand
 R_LIBS = -Wl,--export-dynamic -fopenmp -L/cbio/donnees/lslim/.linuxbrew/opt/gettext/lib -L/cbio/donnees/lslim/.linuxbrew/opt/readline/lib -L/cbio/donnees/lslim/.linuxbrew/lib -L/cbio/donnees/lslim/.linuxbrew/opt/gettext/lib -L/cbio/donnees/lslim/.linuxbrew/opt/readline/lib -L/cbio/donnees/lslim/.linuxbrew/lib -L/cbio/donnees/lslim/.linuxbrew/Cellar/r/4.0.0/lib/R/lib -lR -L/cbio/donnees/lslim/.linuxbrew/Cellar/pcre2/10.34/lib -lpcre2-8 -llzma -lbz2 -lz -lrt -ldl -lm -licuuc -licui18n
 
 cu_sources := $(wildcard *.cu)
