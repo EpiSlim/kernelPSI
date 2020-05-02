@@ -65,8 +65,10 @@ __host__ double cuda_find_max(const double *d_data, const int data_len) {
   cudaDeviceSynchronize();
 
   double result = d_extrm[0];
-  for (int i = 1; i < blocks_per_grid; i++)
-    result = ((SIGN * d_extrm[i] > SIGN * result) ? d_extrm[i] : ;
+  for (int i = 1; i < blocks_per_grid; i++) 
+     result = ((SIGN * d_extrm[i] > SIGN * result) ? d_extrm[i] : result;
 
-    return result;
+  cudaFree(d_extrm);
+
+  return result;
 }

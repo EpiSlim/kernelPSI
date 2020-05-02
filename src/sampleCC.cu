@@ -61,7 +61,7 @@ __global__ void cuda_bound_determine(int n, double *left, double *right,
   }
 }
 
-__global__ void host_all_positive(int n, double *a, bool *result) {
+__global__ void cuda_all_positive(int n, double *a, bool *result) {
   *result = 1;
   for (int i = 0; i < n; ++i)
     *result *= a[i] > 0;
@@ -73,6 +73,18 @@ __global__ void host_all_positive(int n, double *a, bool *result) {
 arma::mat sampleCC(arma::field<arma::mat> A, NumericVector initial,
                    int n_replicates, double mu = 0.0, double sigma = 1.0,
                    int n_iter = 1.0e+5, int burn_in = 1.0e+3) {
+
+  // GPU block and thread layout
+  int blockSize = 256;
+  int numBlocks = (n + blockSize - 1) / blockSize;
+
+  // Create pseudo-random number generator
+  curandGenerator_t gen;
+  curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
+
+  // CUDA operations handlers
+  cublasHandle_t handle;
+  cublasStatus_t statHandle = cublasCreate(&handle);
 
   // Initialization
   int n = initial.size(); // sample size
@@ -105,7 +117,7 @@ arma::mat sampleCC(arma::field<arma::mat> A, NumericVector initial,
 
   cudaMalloc(&bCUDA, sizeof(bool));
 
-  // do not forget to intialiaze candidateN
+  // Initialization of candidateN
   cudaMemcpy(candidateN, initial_cdf, n * sizeof(double),
              cudaMemcpyHostToDevice);
 
@@ -114,18 +126,6 @@ arma::mat sampleCC(arma::field<arma::mat> A, NumericVector initial,
     cudaMemcpy(matrixCUDA + r * n * n * sizeof(double), trans(A(r)).memptr(),
                n * n * sizeof(double), cudaMemcpyHostToDevice);
   }
-
-  // GPU block and thread layout
-  int blockSize = 256;
-  int numBlocks = (n + blockSize - 1) / blockSize;
-
-  // Create pseudo-random number generator
-  curandGenerator_t gen;
-  curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
-
-  // CUDA operations handlers
-  cublasHandle_t handle;
-  cublasStatus_t statHandle = cublasCreate(&handle);
 
   // Set these constants so we get a simple matrix multiply with cublasDgemm
   double alpha = 1.0;
@@ -171,7 +171,7 @@ arma::mat sampleCC(arma::field<arma::mat> A, NumericVector initial,
       cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, A.n_elem, 1, n, &alpha,
                   resultCUDA, n, candidateQ, n, &beta, cdtCUDA, A.n_elem);
 
-      host_all_positive<<<1, 1>>>(A.n_elem, cdtCUDA, bCUDA);
+      cuda_all_positive<<<1, 1>>>(A.n_elem, cdtCUDA, bCUDA);
 
       cudaDeviceSynchronize();
 
