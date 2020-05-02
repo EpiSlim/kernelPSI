@@ -15,10 +15,10 @@ using namespace Rcpp;
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-#include "maxmin.cuh"
+#include "maxmin.hpp"
 
 // CUDA kernels
-__global__ void cuda_affine_trans(double lambda, int n, double *a, double *b,
+__global__ void cuda_affine_trans(double lambda, int n, double *a, double *b, 
                                   double *c) {
   int index = blockIdx.x * blockDim.x + threadIdx.x;
   int stride = blockDim.x * gridDim.x;
@@ -74,8 +74,13 @@ arma::mat sampleCC(arma::field<arma::mat> A, NumericVector initial,
                    int n_replicates, double mu = 0.0, double sigma = 1.0,
                    int n_iter = 1.0e+5, int burn_in = 1.0e+3) {
 
+  // Initialization
+  int n = initial.size(); // sample size
+  arma::vec initial_cdf = Rcpp::as<arma::vec>(wrap(pnorm(initial, mu, sigma)));
+  arma::mat qsamples(n, n_replicates + burn_in, arma::fill::zeros);
+
   // GPU block and thread layout
-  int blockSize = 256;
+  const int blockSize = 256;
   int numBlocks = (n + blockSize - 1) / blockSize;
 
   // Create pseudo-random number generator
@@ -85,11 +90,6 @@ arma::mat sampleCC(arma::field<arma::mat> A, NumericVector initial,
   // CUDA operations handlers
   cublasHandle_t handle;
   cublasStatus_t statHandle = cublasCreate(&handle);
-
-  // Initialization
-  int n = initial.size(); // sample size
-  arma::vec initial_cdf = Rcpp::as<arma::vec>(wrap(pnorm(initial, mu, sigma)));
-  arma::mat qsamples(n, n_replicates + burn_in, arma::fill::zeros);
 
   // Declaring GPU objects
   double *lambda, *norm2;
@@ -118,12 +118,14 @@ arma::mat sampleCC(arma::field<arma::mat> A, NumericVector initial,
   cudaMalloc(&bCUDA, sizeof(bool));
 
   // Initialization of candidateN
-  cudaMemcpy(candidateN, initial_cdf, n * sizeof(double),
+  cudaMemcpy(candidateN, initial_cdf.memptr(), n * sizeof(double),
              cudaMemcpyHostToDevice);
 
   // Sequentially transfer constraint matrix to GPU
+  arma::mat transA(n, n, arma::fill::zeros);
   for (int r = 0; r < A.n_elem; ++r) {
-    cudaMemcpy(matrixCUDA + r * n * n * sizeof(double), trans(A(r)).memptr(),
+    transA = trans(A(r));
+    cudaMemcpy(matrixCUDA + r * n * n * sizeof(double), transA.memptr(),
                n * n * sizeof(double), cudaMemcpyHostToDevice);
   }
 
@@ -149,8 +151,8 @@ arma::mat sampleCC(arma::field<arma::mat> A, NumericVector initial,
     cuda_bound_determine<<<numBlocks, blockSize>>>(n, leftV, rightV, boundA,
                                                    boundB, thetaV);
 
-    double leftQ = cu_find_max<1, 2, blockSize>(leftV, n);
-    double rightQ = cu_find_max<-1, 2, blockSize>(rightV, n);
+    double leftQ = cuda_find_max<1, 2, blockSize>(leftV, n);
+    double rightQ = cuda_find_max<-1, 2, blockSize>(rightV, n);
 
     for (int iter = 0; iter < n_iter; ++iter) {
       if (iter == n_iter)

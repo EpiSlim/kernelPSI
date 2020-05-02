@@ -23,7 +23,7 @@ CU_ARGS += -Xcudafe --diag_suppress=initialization_not_reachable
 CU_ARGS += -Xcudafe --diag_suppress=missing_initializer_on_const
 CU_ARGS += -Xcudafe --diag_suppress=declared_but_not_referenced
 CU_INCL = -I../inst/include/ -I/cbio/donnees/lslim/.linuxbrew/Cellar/r/4.0.0/lib/R/include -I/cbio/donnees/lslim/.linuxbrew/lib/R/4.0/site-library/Rcpp/include 
-CU_ARCH =  -gencode arch=compute_37,code=sm_37
+CU_ARCH =  -gencode arch=compute_60,code=sm_60
 
 CXX=g++
 NVCC=/cm/shared/apps/cuda10.0/toolkit/10.0.130/bin/nvcc

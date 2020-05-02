@@ -59,14 +59,14 @@ __host__ double cuda_find_max(const double *d_data, const int data_len) {
   double *d_extrm;
   cudaMallocManaged((void **)&d_extrm, sizeof(double) * blocks_per_grid);
 
-  cu_max_reduce<BLKSZ, SIGN>
+  cuda_max_reduce<BLKSZ, SIGN>
       <<<blocks_per_grid, thread_per_block>>>(d_data, data_len, d_extrm);
 
   cudaDeviceSynchronize();
 
   double result = d_extrm[0];
   for (int i = 1; i < blocks_per_grid; i++) 
-     result = ((SIGN * d_extrm[i] > SIGN * result) ? d_extrm[i] : result;
+     result = ((SIGN * d_extrm[i] > SIGN * result) ? d_extrm[i] : result);
 
   cudaFree(d_extrm);
 
