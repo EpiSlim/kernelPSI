@@ -22,7 +22,7 @@ using namespace Rcpp;
 // #include "maxmin.hpp"
 
 // CUDA kernels
-__global__ void cuda_affine_trans(double lambda, int n, double *a, double *b, 
+__global__ void cuda_affine_trans(double lambda, int n, double *a, double *b,
                                   double *c) {
   int index = blockIdx.x * blockDim.x + threadIdx.x;
   int stride = blockDim.x * gridDim.x;
@@ -128,8 +128,8 @@ __host__ double cuda_find_max(const double *d_data, const int data_len) {
   cudaDeviceSynchronize();
 
   double result = d_extrm[0];
-  for (int i = 1; i < blocks_per_grid; i++) 
-     result = ((SIGN * d_extrm[i] > SIGN * result) ? d_extrm[i] : result);
+  for (int i = 1; i < blocks_per_grid; i++)
+    result = ((SIGN * d_extrm[i] > SIGN * result) ? d_extrm[i] : result);
 
   cudaFree(d_extrm);
 
