@@ -55,7 +55,6 @@ arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial, int n_replica
     viennacl::matrix<double, viennacl::row_major> prodCL(A.n_elem, n);
     copy(matA, matrixCL);
 
-    int r;
     for (int s = 0; s < (n_replicates + burn_in); ++s)
     {
 
