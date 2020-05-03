@@ -24,7 +24,6 @@ arma::mat sampleC2(arma::field<arma::mat> A, NumericVector initial,
 
   int n = initial.size();
   arma::mat qsamples(n, n_replicates + burn_in, arma::fill::zeros);
-  arma::mat candidates(n, n_replicates + burn_in + 1, arma::fill::zeros);
   arma::vec candidateO(n), candidateQ(n),
       candidateN = Rcpp::as<arma::vec>(wrap(pnorm(initial, mu, sigma)));
   arma::vec cdt(A.n_elem);
@@ -62,6 +61,7 @@ arma::mat sampleC2(arma::field<arma::mat> A, NumericVector initial,
 
   // CUDA operations handlers
   cublasHandle_t handle;
+  cublasStatus_t statHandle = cublasCreate(&handle);
 
   for (int s = 0; s < (n_replicates + burn_in); ++s) {
 
