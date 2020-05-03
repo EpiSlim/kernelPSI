@@ -279,7 +279,9 @@ arma::mat sampleCC(arma::field<arma::mat> A, NumericVector initial,
   cudaFree(boundB);
   cudaFree(leftV);
   cudaFree(rightV);
-  cudaFree(bCUDA);  
+  cudaFree(bCUDA); 
+  
+  cublasDestroy(handle);
 
   return qsamples.cols(burn_in, n_replicates + burn_in - 1);
 }

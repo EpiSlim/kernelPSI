@@ -6,7 +6,7 @@
 using namespace std::chrono;
 
 #include <RcppArmadillo.h>
-#include <RcppArmadilloExtensions/sample.h>
+// #include <RcppArmadilloExtensions/sample.h>
 using namespace Rcpp;
 
 // CUDA headers
@@ -85,18 +85,19 @@ arma::mat sampleC2(arma::field<arma::mat> A, NumericVector initial,
       candidateQ = Rcpp::as<arma::vec>(
           wrap(qnorm(as<NumericVector>(wrap(candidateN)), mu, sigma)));
 
-      viennacl::copy(candidateQ, vectorCL);
       cudaMemcpy(vectorCUDA, candidateQ.memptr(), n * sizeof(double),
                  cudaMemcpyHostToDevice);
 
       cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n * A.n_elem, 1, n, &alpha,
-                  n * A.n_elem, n, vectorCUDA, n, &beta, prodCUDA,
+                  matrixCUDA, n * A.n_elem, vectorCUDA, n, &beta, prodCUDA,
                   n * A.n_elem);
 
       cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, A.n_elem, 1, n, &alpha,
                   prodCUDA, n, vectorCUDA, n, &beta, cdtCUDA, A.n_elem);
 
-      cudaMemcpy(cdt, cdtCUDA, A.n_elem * sizeof(double),
+      cudaDeviceSynchronize();
+
+      cudaMemcpy(cdt.memptr(), cdtCUDA, A.n_elem * sizeof(double),
                  cudaMemcpyDeviceToHost);
 
       if (all(cdt >= 0)) {
@@ -111,6 +112,8 @@ arma::mat sampleC2(arma::field<arma::mat> A, NumericVector initial,
   cudaFree(matrixCUDA);
   cudaFree(prodCUDA);
   cudaFree(cdtCUDA);
+
+  cublasDestroy(handle);
 
   return qsamples.cols(burn_in, n_replicates + burn_in - 1);
 }
