@@ -22,12 +22,12 @@ using namespace Rcpp;
 // #include "maxmin.hpp"
 
 // CUDA kernels
-__global__ void cuda_affine_trans(double lambda, int n, double *a, double *b,
+__global__ void cuda_affine_trans(double *lambda, int n, double *a, double *b, 
                                   double *c) {
   int index = blockIdx.x * blockDim.x + threadIdx.x;
   int stride = blockDim.x * gridDim.x;
   for (int i = index; i < n; i += stride)
-    c[i] = a[i] + lambda * b[i];
+    c[i] = a[i] + *lambda * b[i];
 }
 
 __global__ void cuda_inverse_cdf(int n, double *a, double *b, double mu,
@@ -38,11 +38,15 @@ __global__ void cuda_inverse_cdf(int n, double *a, double *b, double mu,
     a[i] = normcdfinv((b[i] - mu) / sigma);
 }
 
-__global__ void cuda_vector_normalize(int n, double norm2, double *a) {
+__global__ void cuda_vector_normalize(int n, double *norm2, double *a) {
   int index = blockIdx.x * blockDim.x + threadIdx.x;
   int stride = blockDim.x * gridDim.x;
   for (int i = index; i < n; i += stride)
-    a[i] /= norm2;
+    a[i] /= *norm2;
+}
+
+__global__ void cuda_uniform_scale(double *lambda, double left, double right){
+   *lambda = left + *lambda * (right - left);
 }
 
 __global__ void cuda_bound_vector(int n, double *A, double *B,
@@ -66,9 +70,9 @@ __global__ void cuda_bound_determine(int n, double *left, double *right,
 }
 
 __global__ void cuda_all_positive(int n, double *a, bool *result) {
-  *result = 1;
+  *result = true;
   for (int i = 0; i < n; ++i)
-    *result *= a[i] > 0;
+    *result = *result && (a[i] > 0);
 }
 
 template <int SIGN, int BLKSZ>
@@ -147,7 +151,7 @@ arma::mat sampleCC(arma::field<arma::mat> A, NumericVector initial,
   int n = initial.size(); // sample size
   arma::vec initial_cdf = Rcpp::as<arma::vec>(wrap(pnorm(initial, mu, sigma)));
   arma::mat qsamples(n, n_replicates + burn_in, arma::fill::zeros);
-
+  
   // GPU block and thread layout
   const int blockSize = 256;
   int numBlocks = (n + blockSize - 1) / blockSize;
@@ -189,7 +193,7 @@ arma::mat sampleCC(arma::field<arma::mat> A, NumericVector initial,
   // Initialization of candidateN
   cudaMemcpy(candidateN, initial_cdf.memptr(), n * sizeof(double),
              cudaMemcpyHostToDevice);
-
+  
   // Sequentially transfer constraint matrix to GPU
   arma::mat transA(n, n, arma::fill::zeros);
   for (int r = 0; r < A.n_elem; ++r) {
@@ -201,52 +205,57 @@ arma::mat sampleCC(arma::field<arma::mat> A, NumericVector initial,
   // Set these constants so we get a simple matrix multiply with cublasDgemm
   double alpha = 1.0;
   double beta = 0.0;
+  
+  bool bHOST;
 
   for (int s = 0; s < (n_replicates + burn_in); ++s) {
 
     // Step update
     cudaMemcpy(candidateO, candidateN, n * sizeof(double),
                cudaMemcpyDeviceToDevice);
-
+    
     // Sample an n-dimensional vector from the unit sphere
     curandGenerateUniformDouble(gen, thetaV, n);
     cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 1, 1, n, &alpha, thetaV, 1,
                 thetaV, n, &beta, norm2, 1);
-    cuda_vector_normalize<<<numBlocks, blockSize>>>(n, *norm2, thetaV);
-
+    
+    cuda_vector_normalize<<<numBlocks, blockSize>>>(n, norm2, thetaV);
+    
     // Determine interval sampling boundaries for lambda
     cuda_bound_vector<<<numBlocks, blockSize>>>(n, boundA, boundB, candidateO,
                                                 thetaV);
     cuda_bound_determine<<<numBlocks, blockSize>>>(n, leftV, rightV, boundA,
                                                    boundB, thetaV);
-
+    
     double leftQ = cuda_find_max<1, 2, blockSize>(leftV, n);
     double rightQ = cuda_find_max<-1, 2, blockSize>(rightV, n);
-
+   
     for (int iter = 0; iter < n_iter; ++iter) {
       if (iter == n_iter)
         stop("The quadratic constraints cannot be satisfied");
 
       curandGenerateUniformDouble(gen, lambda, 1);
-      *lambda = leftQ + *lambda * (rightQ - leftQ);
+      cuda_uniform_scale<<<1, 1>>>(lambda, leftQ, rightQ);
 
-      cuda_affine_trans<<<numBlocks, blockSize>>>(*lambda, n, candidateO,
+      cuda_affine_trans<<<numBlocks, blockSize>>>(lambda, n, candidateO,
                                                   thetaV, candidateN);
       cuda_inverse_cdf<<<numBlocks, blockSize>>>(n, candidateQ, candidateN, mu,
                                                  sigma);
-
+      
       cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, n * A.n_elem, 1, n, &alpha,
                   matrixCUDA, n, candidateQ, n, &beta, resultCUDA,
                   n * A.n_elem);
 
       cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, A.n_elem, 1, n, &alpha,
                   resultCUDA, n, candidateQ, n, &beta, cdtCUDA, A.n_elem);
-
+       
       cuda_all_positive<<<1, 1>>>(A.n_elem, cdtCUDA, bCUDA);
 
       cudaDeviceSynchronize();
-
-      if (*bCUDA) {
+      
+      cudaMemcpy(&bHOST, bCUDA, sizeof(bool),
+                   cudaMemcpyDeviceToHost);
+      if (bHOST) {
         cudaMemcpy(qsamples.colptr(s), candidateQ, n * sizeof(double),
                    cudaMemcpyDeviceToHost);
         break;
@@ -270,6 +279,7 @@ arma::mat sampleCC(arma::field<arma::mat> A, NumericVector initial,
   cudaFree(boundB);
   cudaFree(leftV);
   cudaFree(rightV);
+  cudaFree(bCUDA);  
 
   return qsamples.cols(burn_in, n_replicates + burn_in - 1);
 }
