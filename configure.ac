@@ -114,8 +114,10 @@ if test x"${RSCRIPT}" == x"yes" ; then
 		R_HOME=`${R_HOME}/bin/Rscript -e 'cat(R.home())'`
 
     rcpp_incl=`${R_HOME}/bin/Rscript -e 'Rcpp:::CxxFlags()'`
-		thrust_incl=`${R_HOME}/bin/Rscript -e 'cat(paste("-I", system.file("include", package = "thrust"), sep = ""))'`
-		AC_SUBST(RCPP_INCL,["$rcpp_incl"])
+    rcpparmadillo_incl=`${R_HOME}/bin/Rscript -e 'RcppArmadillo:::CxxFlags()'`
+    thrust_incl=`${R_HOME}/bin/Rscript -e 'cat(paste("-I", system.file("include", package = "thrust"), sep = ""))'`
+    AC_SUBST(RCPP_INCL,["$rcpp_incl"])
+    AC_SUBST(RCPPARMA_INCL,["$rcpparmadillo_incl"])
     AC_SUBST(THRUST_INCL,["$thrust_incl"])
 else
     echo "

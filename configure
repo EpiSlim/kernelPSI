@@ -593,6 +593,7 @@ CU_INCL
 GPURCUDA_CXXFLAGS
 GPURCUDA_CPPFLAGS
 THRUST_INCL
+RCPPARMA_INCL
 RCPP_INCL
 RSCRIPT
 BACKEND
@@ -2793,7 +2794,7 @@ $as_echo "\"yes -- using ${CUDA_HOME}/lib64 for CUDA libs\"" >&6; }
 				#AC_SUBST(CUDA_LIBDIR,["$cu_libdir"])
 		fi
 
-		GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand --larmadillo"
+		GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
 		BACKEND="CUDA"
 
 else
@@ -2887,7 +2888,7 @@ $as_echo "\"yes -- using ${CUDA_HOME}/lib64 for CUDA libs\"" >&6; }
 					#AC_SUBST(CUDA_LIBDIR,["$cu_libdir"])
 			fi
 
-			GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand -larmadillo"
+			GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
 			BACKEND="CUDA"
 
 
@@ -2940,8 +2941,11 @@ if test x"${RSCRIPT}" == x"yes" ; then
 		R_HOME=`${R_HOME}/bin/Rscript -e 'cat(R.home())'`
 
     rcpp_incl=`${R_HOME}/bin/Rscript -e 'Rcpp:::CxxFlags()'`
-		thrust_incl=`${R_HOME}/bin/Rscript -e 'cat(paste("-I", system.file("include", package = "thrust"), sep = ""))'`
-		RCPP_INCL="$rcpp_incl"
+    rcpparmadillo_incl=`${R_HOME}/bin/Rscript -e 'RcppArmadillo:::CxxFlags()'`
+    thrust_incl=`${R_HOME}/bin/Rscript -e 'cat(paste("-I", system.file("include", package = "thrust"), sep = ""))'`
+    RCPP_INCL="$rcpp_incl"
+
+    RCPPARMA_INCL="$rcpparmadillo_incl"
 
     THRUST_INCL="$thrust_incl"
 
