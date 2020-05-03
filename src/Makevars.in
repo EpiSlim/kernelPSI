@@ -14,7 +14,7 @@ cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
 
 OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
 
-R_INC = -I../inst/include @R_INCL@ @RCPP_INCL@ @RCPPARMA_INCL@ @CU_INCL@
+R_INC = @R_INCL@ @RCPP_INCL@ @RCPPARMA_INCL@ @CU_INCL@
 CXX_ARGS = @R_CPIC@
 
 CU_ARGS := -Xcompiler -fPIC -std=c++11
@@ -22,7 +22,7 @@ CU_ARGS += -Xcudafe --diag_suppress=code_is_unreachable
 CU_ARGS += -Xcudafe --diag_suppress=initialization_not_reachable
 CU_ARGS += -Xcudafe --diag_suppress=missing_initializer_on_const
 CU_ARGS += -Xcudafe --diag_suppress=declared_but_not_referenced
-CU_INCL = -I../inst/include/ @R_INCL@ @RCPPARMA_INCL@ @RCPP_INCL@ 
+CU_INCL = @R_INCL@ @RCPPARMA_INCL@ @RCPP_INCL@ 
 CU_ARCH = @CU_ARCH@
 
 CXX=@CXX@
