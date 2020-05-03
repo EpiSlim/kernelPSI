@@ -2793,7 +2793,7 @@ $as_echo "\"yes -- using ${CUDA_HOME}/lib64 for CUDA libs\"" >&6; }
 				#AC_SUBST(CUDA_LIBDIR,["$cu_libdir"])
 		fi
 
-		GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
+		GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand --larmadillo"
 		BACKEND="CUDA"
 
 else
@@ -2887,7 +2887,7 @@ $as_echo "\"yes -- using ${CUDA_HOME}/lib64 for CUDA libs\"" >&6; }
 					#AC_SUBST(CUDA_LIBDIR,["$cu_libdir"])
 			fi
 
-			GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
+			GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand -larmadillo"
 			BACKEND="CUDA"
 
 
