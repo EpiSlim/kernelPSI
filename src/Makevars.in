@@ -1,9 +1,17 @@
 CXX_STD = CXX11
 
 PKG_CPPFLAGS = @GPURCUDA_CPPFLAGS@
-PKG_CXXFLAGS = @GPURCUDA_CXXFLAGS@
+PKG_CPPFLAGS += $(SHLIB_OPENMP_CPPFLAGS)
+
+PKG_CXXFLAGS = @GPURCUDA_CXXFLAGS@ 
+PKG_CXXFLAGS += $(SHLIB_OPENMP_CXXFLAGS) 
 
 PKG_LIBS = @GPURCUDA_LIBS@
+PKG_LIBS += $(SHLIB_OPENMP_CXXFLAGS) 
+PKG_LIBS += $(LAPACK_LIBS) 
+PKG_LIBS += $(BLAS_LIBS) 
+PKG_LIBS += $(FLIBS) 
+
 R_LIBS = @R_LIBS@
 
 cu_sources := $(wildcard *.cu)
@@ -36,6 +44,7 @@ kernelPSI.so: $(OBJECTS)
 	$(CXX) $(CXX_ARGS) $(R_INC) -c $< -o $@
 %.o: %.cu $(cu_sources)
 	$(NVCC) $(CU_ARCH) -DGPU -x cu -c $(CU_ARGS) $(CU_INCL) -c $< -o $@
+
 
 clean:
 	@rm -rf *.o *.so *.dll

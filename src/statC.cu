@@ -32,7 +32,7 @@ __global__ void cuda_column_sum(int n, int p, double *x, double *y) {
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
-double statCC(arma::vec sample, arma::mat replicates,
+double statC(arma::vec sample, arma::mat replicates,
               arma::field<arma::mat> K) {
 
   // Compute the sum kernel
