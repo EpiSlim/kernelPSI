@@ -193,6 +193,10 @@ sampleC <- function(A, initial, n_replicates, mu, sigma, n_iter, burn_in) {
     .Call(`_kernelPSI_sampleC`, A, initial, n_replicates, mu, sigma, n_iter, burn_in)
 }
 
+sampleC2 <- function(A, initial, n_replicates, mu, sigma, n_iter, burn_in) {
+    .Call(`_kernelPSI_sampleC2`, A, initial, n_replicates, mu, sigma, n_iter, burn_in)
+}
+
 sampleCC <- function(A, initial, n_replicates, mu, sigma, n_iter, burn_in) {
     .Call(`_kernelPSI_sampleCC`, A, initial, n_replicates, mu, sigma, n_iter, burn_in)
 }

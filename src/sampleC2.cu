@@ -44,7 +44,7 @@ arma::mat sampleC2(arma::field<arma::mat> A, NumericVector initial,
   }
 
   // Declaring GPU objects
-  double *matrixCUDA, *prodCUDA, *vectorCUDA, *cdtCL;
+  double *matrixCUDA, *prodCUDA, *vectorCUDA, *cdtCUDA;
 
   // Resource allocation
   cudaMalloc(&vectorCUDA, n * sizeof(double));
@@ -84,19 +84,20 @@ arma::mat sampleC2(arma::field<arma::mat> A, NumericVector initial,
       candidateN = candidateO + lambda * thetaV;
       candidateQ = Rcpp::as<arma::vec>(
           wrap(qnorm(as<NumericVector>(wrap(candidateN)), mu, sigma)));
-
+      
+      Rcout << "Hello 1" << std::endl;
       cudaMemcpy(vectorCUDA, candidateQ.memptr(), n * sizeof(double),
                  cudaMemcpyHostToDevice);
-
+      Rcout << "Hello 2" << std::endl;
       cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n * A.n_elem, 1, n, &alpha,
                   matrixCUDA, n * A.n_elem, vectorCUDA, n, &beta, prodCUDA,
                   n * A.n_elem);
-
+      Rcout << "Hello 3" << std::endl;
       cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, A.n_elem, 1, n, &alpha,
                   prodCUDA, n, vectorCUDA, n, &beta, cdtCUDA, A.n_elem);
 
       cudaDeviceSynchronize();
-
+      Rcout << "Hello 4" << std::endl;
       cudaMemcpy(cdt.memptr(), cdtCUDA, A.n_elem * sizeof(double),
                  cudaMemcpyDeviceToHost);
 
