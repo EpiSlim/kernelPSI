@@ -1,17 +1,11 @@
 #define ARMA_ALLOW_FAKE_GCC
 
-#include <chrono>
-#include <ctime>
-#include <ratio>
-using namespace std::chrono;
-
 #include <RcppArmadillo.h>
-#include <RcppArmadilloExtensions/sample.h>
+//#include <RcppArmadilloExtensions/sample.h>
 using namespace Rcpp;
 
 // CUDA headers
 #include "cublas_v2.h"
-#include "curand.h"
 #include <cuda.h>
 #include <cuda_runtime.h>
 

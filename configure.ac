@@ -39,7 +39,7 @@ if test "${CUDA_HOME}"; then
 	CU_ARCH=`python inst//python//arch_detect.py`
 	AC_SUBST(CU_ARCH)
 
-	KERNELPSI_LIBS="-L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
+	KERNELPSI_LIBS="-L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas"
 
 else
 

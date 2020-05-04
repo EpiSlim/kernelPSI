@@ -44,7 +44,7 @@ all: kernelPSI.so
 kernelPSI.so: $(OBJECTS)
 
 %.o: %.cpp $(cpp_sources)
-	$(CXX) $(CXX_ARGS) $(R_INC) -c $< -o $@
+	$(CXX) -Wall -pedantic $(CXX_ARGS) $(R_INC) -c $< -o $@
 
 CU_ARCH = 
 NVCC =

@@ -1,12 +1,6 @@
 #define ARMA_ALLOW_FAKE_GCC
 
-#include <chrono>
-#include <ctime>
-#include <ratio>
-using namespace std::chrono;
-
 #include <RcppArmadillo.h>
-// #include <RcppArmadilloExtensions/sample.h>
 using namespace Rcpp;
 
 # include "sampleH.hpp"

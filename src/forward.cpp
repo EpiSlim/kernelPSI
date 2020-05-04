@@ -85,7 +85,7 @@ IntegerVector FOHSIC(arma::field<arma::mat> K, arma::mat L, int mKernels = 1)
 arma::field<arma::mat> forwardQ(arma::field<arma::mat> K, IntegerVector select)
 {
     arma::field<arma::mat> constraintQ(K.n_elem - 1);
-    int s;
+    unsigned int s;
     if (select.size() > 1)
     {
         for (s = 0; s != (select.size() - 1); s++)
