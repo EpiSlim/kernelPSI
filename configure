@@ -581,21 +581,21 @@ PACKAGE_STRING='kernelPSI 1.1.0'
 PACKAGE_BUGREPORT=''
 PACKAGE_URL=''
 
-ac_subst_vars='BACKEND
-LTLIBOBJS
+ac_subst_vars='LTLIBOBJS
 LIBOBJS
-CU_ARCH
-GPURCUDA_LIBS
 R_LIBS
 R_CPIC
 R_INCL
-NVCC
 CU_INCL
-GPURCUDA_CXXFLAGS
-GPURCUDA_CPPFLAGS
+KERNELPSI_LIBS
+KERNELPSI_CXXFLAGS
+KERNELPSI_CPPFLAGS
+BACKEND
 RCPPARMA_INCL
 RCPP_INCL
 RSCRIPT
+CU_ARCH
+NVCC
 CXXCPP
 OBJEXT
 EXEEXT
@@ -2687,17 +2687,16 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-GPURCUDA_CPPFLAGS="-I. "
-GPURCUDA_CXXFLAGS=""
-GPURCUDA_LIBS=""
+KERNELPSI_CPPFLAGS="-I. "
+KERNELPSI_CXXFLAGS=""
 
-if  ! -z "${CUDA_HOME}" ; then
+if test "${CUDA_HOME}"; then
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: \"BACKEND = GPU\"" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: \"BACKEND = GPU\"" >&5
 $as_echo "$as_me: \"BACKEND = GPU\"" >&6;}
-		BACKEND="CUDA"
+	BACKEND="CUDA"
 
-		as_ac_File=`$as_echo "ac_cv_file_${CUDA_HOME}/bin/nvcc" | $as_tr_sh`
+	as_ac_File=`$as_echo "ac_cv_file_${CUDA_HOME}/bin/nvcc" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${CUDA_HOME}/bin/nvcc" >&5
 $as_echo_n "checking for ${CUDA_HOME}/bin/nvcc... " >&6; }
 if eval \${$as_ac_File+:} false; then :
@@ -2718,16 +2717,21 @@ if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
   HAS_NVCC="yes"
 fi
 
-		if  ! -z "${HAS_NVCC}" ; then
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"NVCC found\"" >&5
+	if test "${HAS_NVCC}"; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"NVCC found\"" >&5
 $as_echo "\"NVCC found\"" >&6; }
-		else
-			as_fn_error $? "\"NVCC not found; check CUDA install\"" "$LINENO" 5
-		fi
+	else
+		as_fn_error $? "\"NVCC not found; check CUDA install\"" "$LINENO" 5
+	fi
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking \"whether this is the 64 bit linux version of CUDA\"" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking \"building the nvcc command line\"" >&5
+$as_echo_n "checking \"building the nvcc command line\"... " >&6; }
+	NVCC="${CUDA_HOME}/bin/nvcc"
+
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking \"whether this is the 64 bit linux version of CUDA\"" >&5
 $as_echo_n "checking \"whether this is the 64 bit linux version of CUDA\"... " >&6; }
-		as_ac_File=`$as_echo "ac_cv_file_${CUDA_HOME}/lib64/libcudart.so" | $as_tr_sh`
+	as_ac_File=`$as_echo "ac_cv_file_${CUDA_HOME}/lib64/libcudart.so" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${CUDA_HOME}/lib64/libcudart.so" >&5
 $as_echo_n "checking for ${CUDA_HOME}/lib64/libcudart.so... " >&6; }
 if eval \${$as_ac_File+:} false; then :
@@ -2748,17 +2752,30 @@ if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
   BIT64="yes"
 fi
 
-		if  ! -z "${BIT64}" ; then
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"yes -- using ${CUDA_HOME}/lib64 for CUDA libs\"" >&5
+	if test "${BIT64}"; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"yes -- using ${CUDA_HOME}/lib64 for CUDA libs\"" >&5
 $as_echo "\"yes -- using ${CUDA_HOME}/lib64 for CUDA libs\"" >&6; }
-			cu_libdir="${CUDA_HOME}/lib64"
-		else
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"no -- using ${CUDA_HOME}/lib for CUDA libs\"" >&5
+		cu_libdir="${CUDA_HOME}/lib64"
+	else
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"no -- using ${CUDA_HOME}/lib for CUDA libs\"" >&5
 $as_echo "\"no -- using ${CUDA_HOME}/lib for CUDA libs\"" >&6; }
-			cu_libdir="${CUDA_HOME}/lib"
-		fi
+		cu_libdir="${CUDA_HOME}/lib"
+	fi
 
-		GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking \"determining GPU architecture\"" >&5
+$as_echo_n "checking \"determining GPU architecture\"... " >&6; }
+	CU_ARCH=`python src/arch_detect.py`
+
+
+	KERNELPSI_LIBS="-L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
+
+else
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: \"BACKEND = CPU\"" >&5
+$as_echo "$as_me: \"BACKEND = CPU\"" >&6;}
+	BACKEND="CPU"
+
+	KERNELPSI_LIBS="-Wl,-rpath"
 
 fi
 
@@ -2804,16 +2821,16 @@ fi
 
 if test x"${RSCRIPT}" == x"yes" ; then
 
-		R_HOME=`${R_HOME}/bin/Rscript -e 'cat(R.home())'`
-
+	R_HOME=`${R_HOME}/bin/Rscript -e 'cat(R.home())'`
     rcpp_incl=`${R_HOME}/bin/Rscript -e 'Rcpp:::CxxFlags()'`
     rcpparmadillo_incl=`${R_HOME}/bin/Rscript -e 'RcppArmadillo:::CxxFlags()'`
     RCPP_INCL="$rcpp_incl"
 
     RCPPARMA_INCL="$rcpparmadillo_incl"
 
+
 else
-    echo "
+	echo "
   Your installation does not appear to have Rscript installed.
 
   Please make sure that you have a working and complete R installation.
@@ -2824,15 +2841,9 @@ fi
 R_INCL=`"${R_HOME}/bin/R" CMD config --cppflags`
 R_LIBS=`"${R_HOME}/bin/R" CMD config --ldflags`
 R_CPIC=`"${R_HOME}/bin/R" CMD config CPICFLAGS`
-CU_ARCH=`python src/arch_detect.py`
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking \"building the nvcc command line\"" >&5
-$as_echo_n "checking \"building the nvcc command line\"... " >&6; }
-NVCC="${CUDA_HOME}/bin/nvcc"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Building Makevars" >&5
 $as_echo "$as_me: Building Makevars" >&6;}
-
 
 
 
@@ -3997,5 +4008,4 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
-
 
