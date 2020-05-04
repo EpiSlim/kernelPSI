@@ -12,7 +12,7 @@ using namespace Rcpp;
 double statC(arma::vec sample, arma::mat replicates,
               arma::field<arma::mat> K) {
 
-  stop("Trying to access a GPU function");
+  //stop("Trying to access a GPU function");
 
   return 0.0;
 }
