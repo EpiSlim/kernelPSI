@@ -10,7 +10,7 @@ GPURCUDA_CPPFLAGS="-I. -I../inst/include"
 GPURCUDA_CXXFLAGS=""
 GPURCUDA_LIBS=""
 
-if [ ! -z "$CUDA_HOME" ];
+if [ ! -z "$CUDA_HOME" ]; then
 
 		AC_MSG_NOTICE("BACKEND = CUDA")
 		if test -z "${CUDA_HOME}"; then
