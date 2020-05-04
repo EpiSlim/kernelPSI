@@ -592,7 +592,6 @@ NVCC
 CU_INCL
 GPURCUDA_CXXFLAGS
 GPURCUDA_CPPFLAGS
-THRUST_INCL
 RCPPARMA_INCL
 RCPP_INCL
 RSCRIPT
@@ -2718,7 +2717,7 @@ elif test "$BACKEND" = "CUDA"; then
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: \"BACKEND = CUDA\"" >&5
 $as_echo "$as_me: \"BACKEND = CUDA\"" >&6;}
-		GPURCUDA_CPPFLAGS="${GPURCUDA_CPPFLAGS} -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA"
+		#GPURCUDA_CPPFLAGS="${GPURCUDA_CPPFLAGS} -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA"
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking \"Checking environment variable CUDA_HOME\"" >&5
 $as_echo_n "checking \"Checking environment variable CUDA_HOME\"... " >&6; }
@@ -2815,7 +2814,7 @@ $as_echo_n "checking \"Checking environment variable CUDA_HOME\"... " >&6; }
 		if test -z "${CUDA_HOME}"; then
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"No CUDA installation found" >&5
 $as_echo "\"No CUDA installation found" >&6; }
-			GPURCUDA_CPPFLAGS="${GPURCUDA_CPPFLAGS} -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP"
+			#GPURCUDA_CPPFLAGS="${GPURCUDA_CPPFLAGS} -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP"
 			GPURCUDA_CXXFLAGS="${CXXFLAGS} -fopenmp"
 			BACKEND="OPENMP"
 
@@ -2942,13 +2941,12 @@ if test x"${RSCRIPT}" == x"yes" ; then
 
     rcpp_incl=`${R_HOME}/bin/Rscript -e 'Rcpp:::CxxFlags()'`
     rcpparmadillo_incl=`${R_HOME}/bin/Rscript -e 'RcppArmadillo:::CxxFlags()'`
-    thrust_incl=`${R_HOME}/bin/Rscript -e 'cat(paste("-I", system.file("include", package = "thrust"), sep = ""))'`
+    #thrust_incl=`${R_HOME}/bin/Rscript -e 'cat(paste("-I", system.file("include", package = "thrust"), sep = ""))'`
     RCPP_INCL="$rcpp_incl"
 
     RCPPARMA_INCL="$rcpparmadillo_incl"
 
-    THRUST_INCL="$thrust_incl"
-
+    #AC_SUBST(THRUST_INCL,["$thrust_incl"])
 else
     echo "
   Your installation does not appear to have Rscript installed.
