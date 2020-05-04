@@ -586,7 +586,6 @@ LIBOBJS
 R_LIBS
 R_CPIC
 R_INCL
-CU_INCL
 KERNELPSI_LIBS
 KERNELPSI_CXXFLAGS
 KERNELPSI_CPPFLAGS
@@ -2856,7 +2855,6 @@ R_CPIC=`"${R_HOME}/bin/R" CMD config CPICFLAGS`
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Building Makevars" >&5
 $as_echo "$as_me: Building Makevars" >&6;}
-
 
 
 
