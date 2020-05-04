@@ -17,17 +17,17 @@ PKG_LIBS += $(FLIBS)
 R_LIBS = @R_LIBS@
 
 ifeq ($(BACKEND), CUDA)
-	cu_sources := $(wildcard *.cu)
-	cu_sharedlibs := $(patsubst %.cu, %.o, $(cu_sources))
+cu_sources := $(wildcard *.cu)
+cu_sharedlibs := $(patsubst %.cu, %.o, $(cu_sources))
 endif
 
 cpp_sources := $(wildcard *.cpp)
 cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
 
 ifeq ($(BACKEND), CUDA)
-	OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
+OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
 else
-	OBJECTS = $(cpp_sharedlibs)
+OBJECTS = $(cpp_sharedlibs)
 endif
 
 R_INC = @R_INCL@ @RCPP_INCL@ @RCPPARMA_INCL@
@@ -52,9 +52,9 @@ kernelPSI.so: $(OBJECTS)
 CU_ARCH = 
 NVCC =
 ifeq ($(BACKEND), CUDA)
-	CU_ARCH = @CU_ARCH@
-	NVCC = @NVCC@
-	%.o: %.cu $(cu_sources)
+CU_ARCH = @CU_ARCH@
+NVCC = @NVCC@
+%.o: %.cu $(cu_sources)
 	$(NVCC) $(CU_ARCH) -DGPU -x cu -c $(CU_ARGS) $(CU_INCL) -c $< -o $@
 endif
 

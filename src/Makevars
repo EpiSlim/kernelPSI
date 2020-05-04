@@ -1,20 +1,36 @@
+BACKEND = CUDA
+
 CXX_STD = CXX11
 
-PKG_CPPFLAGS = -I. -I../inst/include
-PKG_CXXFLAGS = 
+PKG_CPPFLAGS = -I. 
+PKG_CPPFLAGS += $(SHLIB_OPENMP_CPPFLAGS)
 
-PKG_LIBS =  -L/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -Wl,-rpath,/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -lcudart -lcublas -lcurand
+PKG_CXXFLAGS =  
+PKG_CXXFLAGS += $(SHLIB_OPENMP_CXXFLAGS) 
+
+PKG_LIBS = -L/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -Wl,-rpath,/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -lcudart -lcublas -lcurand
+PKG_LIBS += $(SHLIB_OPENMP_CXXFLAGS) 
+PKG_LIBS += $(LAPACK_LIBS) 
+PKG_LIBS += $(BLAS_LIBS) 
+PKG_LIBS += $(FLIBS) 
+
 R_LIBS = -Wl,--export-dynamic -fopenmp -L/cbio/donnees/lslim/.linuxbrew/opt/gettext/lib -L/cbio/donnees/lslim/.linuxbrew/opt/readline/lib -L/cbio/donnees/lslim/.linuxbrew/lib -L/cbio/donnees/lslim/.linuxbrew/opt/gettext/lib -L/cbio/donnees/lslim/.linuxbrew/opt/readline/lib -L/cbio/donnees/lslim/.linuxbrew/lib -L/cbio/donnees/lslim/.linuxbrew/Cellar/r/4.0.0/lib/R/lib -lR -L/cbio/donnees/lslim/.linuxbrew/Cellar/pcre2/10.34/lib -lpcre2-8 -llzma -lbz2 -lz -lrt -ldl -lm -licuuc -licui18n
 
-cu_sources := $(wildcard *.cu)
-cu_sharedlibs := $(patsubst %.cu, %.o, $(cu_sources))
+ifeq ($(BACKEND), CUDA)
+	cu_sources := $(wildcard *.cu)
+	cu_sharedlibs := $(patsubst %.cu, %.o, $(cu_sources))
+endif
 
 cpp_sources := $(wildcard *.cpp)
 cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
 
-OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
+ifeq ($(BACKEND), CUDA)
+	OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
+else
+	OBJECTS = $(cpp_sharedlibs)
+endif
 
-R_INC = -I../inst/include -I/cbio/donnees/lslim/.linuxbrew/Cellar/r/4.0.0/lib/R/include -I/cbio/donnees/lslim/.linuxbrew/lib/R/4.0/site-library/Rcpp/include 
+R_INC = -I/cbio/donnees/lslim/.linuxbrew/Cellar/r/4.0.0/lib/R/include -I/cbio/donnees/lslim/.linuxbrew/lib/R/4.0/site-library/Rcpp/include -I"/cbio/donnees/lslim/.linuxbrew/lib/R/4.0/site-library/RcppArmadillo/include"
 CXX_ARGS = -fpic
 
 CU_ARGS := -Xcompiler -fPIC -std=c++11
@@ -22,11 +38,9 @@ CU_ARGS += -Xcudafe --diag_suppress=code_is_unreachable
 CU_ARGS += -Xcudafe --diag_suppress=initialization_not_reachable
 CU_ARGS += -Xcudafe --diag_suppress=missing_initializer_on_const
 CU_ARGS += -Xcudafe --diag_suppress=declared_but_not_referenced
-CU_INCL = -I../inst/include/ -I/cbio/donnees/lslim/.linuxbrew/Cellar/r/4.0.0/lib/R/include -I/cbio/donnees/lslim/.linuxbrew/lib/R/4.0/site-library/Rcpp/include 
-CU_ARCH =  -gencode arch=compute_60,code=sm_60
+CU_INCL = -I/cbio/donnees/lslim/.linuxbrew/Cellar/r/4.0.0/lib/R/include -I"/cbio/donnees/lslim/.linuxbrew/lib/R/4.0/site-library/RcppArmadillo/include" -I/cbio/donnees/lslim/.linuxbrew/lib/R/4.0/site-library/Rcpp/include 
 
 CXX=g++
-NVCC=/cm/shared/apps/cuda10.0/toolkit/10.0.130/bin/nvcc
 
 all: kernelPSI.so
 
@@ -34,8 +48,16 @@ kernelPSI.so: $(OBJECTS)
 
 %.o: %.cpp $(cpp_sources)
 	$(CXX) $(CXX_ARGS) $(R_INC) -c $< -o $@
+
+CU_ARCH = 
+NVCC =
+ifeq ($(BACKEND), CUDA)
+CU_ARCH =  -gencode arch=compute_60,code=sm_60
+NVCC = /cm/shared/apps/cuda10.0/toolkit/10.0.130/bin/nvcc
 %.o: %.cu $(cu_sources)
 	$(NVCC) $(CU_ARCH) -DGPU -x cu -c $(CU_ARGS) $(CU_INCL) -c $< -o $@
+endif
+
 
 clean:
 	@rm -rf *.o *.so *.dll
