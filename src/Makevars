@@ -1,33 +1,31 @@
-BACKEND = CUDA
+BACKEND = CPU
 
 CXX_STD = CXX11
 
 PKG_CPPFLAGS = -I. 
-PKG_CPPFLAGS += $(SHLIB_OPENMP_CPPFLAGS)
-
 PKG_CXXFLAGS =  
-PKG_CXXFLAGS += $(SHLIB_OPENMP_CXXFLAGS) 
-
-PKG_LIBS = -L/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -Wl,-rpath,/cm/shared/apps/cuda10.0/toolkit/10.0.130/lib64 -lcudart -lcublas -lcurand
-PKG_LIBS += $(SHLIB_OPENMP_CXXFLAGS) 
-PKG_LIBS += $(LAPACK_LIBS) 
-PKG_LIBS += $(BLAS_LIBS) 
-PKG_LIBS += $(FLIBS) 
+PKG_LIBS = -Wl,-rpath
 
 R_LIBS = -Wl,--export-dynamic -fopenmp -L/cbio/donnees/lslim/.linuxbrew/opt/gettext/lib -L/cbio/donnees/lslim/.linuxbrew/opt/readline/lib -L/cbio/donnees/lslim/.linuxbrew/lib -L/cbio/donnees/lslim/.linuxbrew/opt/gettext/lib -L/cbio/donnees/lslim/.linuxbrew/opt/readline/lib -L/cbio/donnees/lslim/.linuxbrew/lib -L/cbio/donnees/lslim/.linuxbrew/Cellar/r/4.0.0/lib/R/lib -lR -L/cbio/donnees/lslim/.linuxbrew/Cellar/pcre2/10.34/lib -lpcre2-8 -llzma -lbz2 -lz -lrt -ldl -lm -licuuc -licui18n
 
 ifeq ($(BACKEND), CUDA)
-	cu_sources := $(wildcard *.cu)
-	cu_sharedlibs := $(patsubst %.cu, %.o, $(cu_sources))
+cu_sources := $(wildcard *.cu)
+cu_sharedlibs := $(patsubst %.cu, %.o, $(cu_sources))
 endif
 
+ifeq ($(BACKEND), CUDA)
 cpp_sources := $(wildcard *.cpp)
+cpp_sources := $(filter-out statC_cpu.cpp,$(cpp_sources))
+cpp_sources := $(filter-out sampleC_cpu.cpp,$(cpp_sources))
+else
+cpp_sources := $(wildcard *.cpp)
+endif
 cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
 
 ifeq ($(BACKEND), CUDA)
-	OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
+OBJECTS = $(cpp_sharedlibs) $(cu_sharedlibs)
 else
-	OBJECTS = $(cpp_sharedlibs)
+OBJECTS = $(cpp_sharedlibs)
 endif
 
 R_INC = -I/cbio/donnees/lslim/.linuxbrew/Cellar/r/4.0.0/lib/R/include -I/cbio/donnees/lslim/.linuxbrew/lib/R/4.0/site-library/Rcpp/include -I"/cbio/donnees/lslim/.linuxbrew/lib/R/4.0/site-library/RcppArmadillo/include"
@@ -52,8 +50,8 @@ kernelPSI.so: $(OBJECTS)
 CU_ARCH = 
 NVCC =
 ifeq ($(BACKEND), CUDA)
-CU_ARCH =  -gencode arch=compute_60,code=sm_60
-NVCC = /cm/shared/apps/cuda10.0/toolkit/10.0.130/bin/nvcc
+CU_ARCH = 
+NVCC = 
 %.o: %.cu $(cu_sources)
 	$(NVCC) $(CU_ARCH) -DGPU -x cu -c $(CU_ARGS) $(CU_INCL) -c $< -o $@
 endif
