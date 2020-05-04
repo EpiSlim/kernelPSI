@@ -22,7 +22,7 @@ if test "$BACKEND" = "OPENMP"; then
 elif test "$BACKEND" = "CUDA"; then
 
 		AC_MSG_NOTICE("BACKEND = CUDA")
-		GPURCUDA_CPPFLAGS="${GPURCUDA_CPPFLAGS} -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA"
+		#GPURCUDA_CPPFLAGS="${GPURCUDA_CPPFLAGS} -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA"
 
 		AC_MSG_CHECKING("Checking environment variable CUDA_HOME")
 		if test -z "${CUDA_HOME}"; then
@@ -69,7 +69,7 @@ else
 
 		if test -z "${CUDA_HOME}"; then
 			AC_MSG_RESULT("No CUDA installation found, attempting OPENMP install")
-			GPURCUDA_CPPFLAGS="${GPURCUDA_CPPFLAGS} -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP"
+			#GPURCUDA_CPPFLAGS="${GPURCUDA_CPPFLAGS} -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP"
 			GPURCUDA_CXXFLAGS="${CXXFLAGS} -fopenmp"
 			BACKEND="OPENMP"
 			AC_SUBST(BACKEND)
@@ -115,10 +115,10 @@ if test x"${RSCRIPT}" == x"yes" ; then
 
     rcpp_incl=`${R_HOME}/bin/Rscript -e 'Rcpp:::CxxFlags()'`
     rcpparmadillo_incl=`${R_HOME}/bin/Rscript -e 'RcppArmadillo:::CxxFlags()'`
-    thrust_incl=`${R_HOME}/bin/Rscript -e 'cat(paste("-I", system.file("include", package = "thrust"), sep = ""))'`
+    #thrust_incl=`${R_HOME}/bin/Rscript -e 'cat(paste("-I", system.file("include", package = "thrust"), sep = ""))'`
     AC_SUBST(RCPP_INCL,["$rcpp_incl"])
     AC_SUBST(RCPPARMA_INCL,["$rcpparmadillo_incl"])
-    AC_SUBST(THRUST_INCL,["$thrust_incl"])
+    #AC_SUBST(THRUST_INCL,["$thrust_incl"])
 else
     echo "
   Your installation does not appear to have Rscript installed.
