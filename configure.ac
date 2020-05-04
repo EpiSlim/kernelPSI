@@ -33,7 +33,6 @@ if test -z "$CUDA_HOME" ; then
 		fi
 
 		GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
-		fi
 
 fi
 
