@@ -2703,7 +2703,7 @@ GPURCUDA_CPPFLAGS="-I. "
 GPURCUDA_CXXFLAGS=""
 GPURCUDA_LIBS=""
 
-if  ! -z "${CUDA_HOME}" ; then
+if test "${CUDA_HOME}"; then
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: \"BACKEND = GPU\"" >&5
 $as_echo "$as_me: \"BACKEND = GPU\"" >&6;}
@@ -2730,7 +2730,7 @@ if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
   HAS_NVCC="yes"
 fi
 
-		if  ! -z "${HAS_NVCC}" ; then
+		if test "${HAS_NVCC}"; then
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"NVCC found\"" >&5
 $as_echo "\"NVCC found\"" >&6; }
 		else
@@ -2760,7 +2760,7 @@ if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
   BIT64="yes"
 fi
 
-		if  ! -z "${BIT64}" ; then
+		if test "${BIT64}"; then
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"yes -- using ${CUDA_HOME}/lib64 for CUDA libs\"" >&5
 $as_echo "\"yes -- using ${CUDA_HOME}/lib64 for CUDA libs\"" >&6; }
 			cu_libdir="${CUDA_HOME}/lib64"
