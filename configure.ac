@@ -6,47 +6,33 @@ AC_REQUIRE_CPP
 echo "Checking for C++ Compiler"
 AC_PROG_CXX
 
-GPURCUDA_CPPFLAGS="-I. -I../inst/include"
+GPURCUDA_CPPFLAGS="-I. "
 GPURCUDA_CXXFLAGS=""
 GPURCUDA_LIBS=""
 
-if [ ! -z "$CUDA_HOME" ]; then
+if test -z "$CUDA_HOME" ; then
 
-		AC_MSG_NOTICE("BACKEND = CUDA")
-		if test -z "${CUDA_HOME}"; then
-		    CUDA_HOME=`find /usr/local/ -maxdepth 1 -type d -name "cuda*" | sort -V | tail -1`
+		AC_MSG_NOTICE("BACKEND = GPU")
+		BACKEND="CUDA"
+
+		AC_CHECK_FILE([${CUDA_HOME}/bin/nvcc], [HAS_NVCC="yes"])
+		if test -z "${HAS_NVCC}"; then
+			AC_MSG_ERROR("NVCC not found; check CUDA install")
+		else
+		    AC_MSG_RESULT("NVCC found")
 		fi
 
-		if test -z "${CUDA_HOME}"; then
-			AC_MSG_RESULT("No CUDA installation found, attempting OPENMP install")
-			GPURCUDA_CXXFLAGS="${CXXFLAGS} -fopenmp"
-			BACKEND="OPENMP"
-			AC_SUBST(BACKEND)
-
+		AC_MSG_CHECKING("whether this is the 64 bit linux version of CUDA")
+		AC_CHECK_FILE([${CUDA_HOME}/lib64/libcudart.so], [BIT64="yes"])
+		if test -z "${BIT64}"; then
+				AC_MSG_RESULT("no -- using ${CUDA_HOME}/lib for CUDA libs")
+				cu_libdir="${CUDA_HOME}/lib"
 		else
-			AC_MSG_RESULT("using CUDA_HOME=${CUDA_HOME}")
+				AC_MSG_RESULT("yes -- using ${CUDA_HOME}/lib64 for CUDA libs")
+				cu_libdir="${CUDA_HOME}/lib64"
+		fi
 
-			AC_CHECK_FILE([${CUDA_HOME}/bin/nvcc], [HAS_NVCC="yes"])
-			if test -z "${HAS_NVCC}"; then
-			    AC_MSG_ERROR("NVCC not found; check CUDA install")
-			else
-			    AC_MSG_RESULT("NVCC found")
-			fi
-
-			AC_MSG_CHECKING("whether this is the 64 bit linux version of CUDA")
-			AC_CHECK_FILE([${CUDA_HOME}/lib64/libcudart.so], [BIT64="yes"])
-			if test -z "${BIT64}"; then
-					AC_MSG_RESULT("no -- using ${CUDA_HOME}/lib for CUDA libs")
-					cu_libdir="${CUDA_HOME}/lib"
-			else
-					AC_MSG_RESULT("yes -- using ${CUDA_HOME}/lib64 for CUDA libs")
-					cu_libdir="${CUDA_HOME}/lib64"
-			fi
-
-			GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
-			BACKEND="CUDA"
-			AC_SUBST(BACKEND)
-
+		GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
 		fi
 
 fi
@@ -91,3 +77,4 @@ AC_SUBST(R_LIBS)
 AC_SUBST(GPURCUDA_LIBS)
 AC_SUBST(CU_ARCH)
 AC_OUTPUT(src/Makevars)
+AC_SUBST(BACKEND)
