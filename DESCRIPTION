@@ -16,6 +16,7 @@ Description: Different post-selection inference strategies for kernel
   proposed to derive empirical p-values for the test statistics.
 URL: http://proceedings.mlr.press/v97/slim19a.html
 Depends: R (>= 3.5.0)
+SystemRequirements: python
 License: GPL (>=2)
 Imports:
     Rcpp (>= 1.0.1),

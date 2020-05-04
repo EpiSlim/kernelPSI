@@ -2775,7 +2775,7 @@ $as_echo "\"no -- using ${CUDA_HOME}/lib for CUDA libs\"" >&6; }
 
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking \"determining GPU architecture\"" >&5
 $as_echo_n "checking \"determining GPU architecture\"... " >&6; }
-	CU_ARCH=`python src/arch_detect.py`
+	CU_ARCH=`python inst/python/arch_detect.py`
 
 
 	KERNELPSI_LIBS="-L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
@@ -2832,7 +2832,7 @@ fi
 
 if test x"${RSCRIPT}" == x"yes" ; then
 
-	R_HOME=`${R_HOME}/bin/Rscript -e 'cat(R.home())'`
+    R_HOME=`${R_HOME}/bin/Rscript -e 'cat(R.home())'`
     rcpp_incl=`${R_HOME}/bin/Rscript -e 'Rcpp:::CxxFlags()'`
     rcpparmadillo_incl=`${R_HOME}/bin/Rscript -e 'RcppArmadillo:::CxxFlags()'`
     RCPP_INCL="$rcpp_incl"

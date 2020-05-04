@@ -36,7 +36,7 @@ if test "${CUDA_HOME}"; then
 	fi
 
 	AC_MSG_CHECKING("determining GPU architecture")
-	CU_ARCH=`python src/arch_detect.py`
+	CU_ARCH=`python inst/python/arch_detect.py`
 	AC_SUBST(CU_ARCH)
 
 	KERNELPSI_LIBS="-L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
@@ -56,7 +56,7 @@ AC_PROG_RSCRIPT
 
 if test x"${RSCRIPT}" == x"yes" ; then
 
-	R_HOME=`${R_HOME}/bin/Rscript -e 'cat(R.home())'`
+    R_HOME=`${R_HOME}/bin/Rscript -e 'cat(R.home())'`
     rcpp_incl=`${R_HOME}/bin/Rscript -e 'Rcpp:::CxxFlags()'`
     rcpparmadillo_incl=`${R_HOME}/bin/Rscript -e 'RcppArmadillo:::CxxFlags()'`
     AC_SUBST(RCPP_INCL,["$rcpp_incl"])
