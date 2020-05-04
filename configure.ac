@@ -10,13 +10,13 @@ GPURCUDA_CPPFLAGS="-I. "
 GPURCUDA_CXXFLAGS=""
 GPURCUDA_LIBS=""
 
-if [ ! -z "${CUDA_HOME}" ]; then
+if test "${CUDA_HOME}"; then
 
 		AC_MSG_NOTICE("BACKEND = GPU")
 		BACKEND="CUDA"
 
 		AC_CHECK_FILE([${CUDA_HOME}/bin/nvcc], [HAS_NVCC="yes"])
-		if [ ! -z "${HAS_NVCC}" ]; then
+		if test "${HAS_NVCC}"; then
 			AC_MSG_RESULT("NVCC found")
 		else
 			AC_MSG_ERROR("NVCC not found; check CUDA install")
@@ -24,7 +24,7 @@ if [ ! -z "${CUDA_HOME}" ]; then
 
 		AC_MSG_CHECKING("whether this is the 64 bit linux version of CUDA")
 		AC_CHECK_FILE([${CUDA_HOME}/lib64/libcudart.so], [BIT64="yes"])
-		if [ ! -z "${BIT64}" ]; then
+		if test "${BIT64}"; then
 			AC_MSG_RESULT("yes -- using ${CUDA_HOME}/lib64 for CUDA libs")
 			cu_libdir="${CUDA_HOME}/lib64"
 		else
