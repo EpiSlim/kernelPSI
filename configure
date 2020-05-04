@@ -2691,7 +2691,7 @@ GPURCUDA_CPPFLAGS="-I. -I../inst/include"
 GPURCUDA_CXXFLAGS=""
 GPURCUDA_LIBS=""
 
-if  ! -z "$CUDA_HOME" ;
+if  ! -z "$CUDA_HOME" ; then
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: \"BACKEND = CUDA\"" >&5
 $as_echo "$as_me: \"BACKEND = CUDA\"" >&6;}
