@@ -623,7 +623,6 @@ infodir
 docdir
 oldincludedir
 includedir
-runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -695,7 +694,6 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
-runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -948,15 +946,6 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
-  -runstatedir | --runstatedir | --runstatedi | --runstated \
-  | --runstate | --runstat | --runsta | --runst | --runs \
-  | --run | --ru | --r)
-    ac_prev=runstatedir ;;
-  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
-  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
-  | --run=* | --ru=* | --r=*)
-    runstatedir=$ac_optarg ;;
-
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1094,7 +1083,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir runstatedir
+		libdir localedir mandir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1247,7 +1236,6 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
-  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -2703,118 +2691,17 @@ GPURCUDA_CPPFLAGS="-I. -I../inst/include"
 GPURCUDA_CXXFLAGS=""
 GPURCUDA_LIBS=""
 
-if test "$BACKEND" = "OPENMP"; then
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: \"BACKEND = OPENMP\"" >&5
-$as_echo "$as_me: \"BACKEND = OPENMP\"" >&6;}
-		GPURCUDA_CPPFLAGS="${GPURCUDA_CPPFLAGS} -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP"
-		GPURCUDA_CXXFLAGS="${GPURCUDA_CXXFLAGS} -fopenmp"
-
-		BACKEND="OPENMP"
-
-
-elif test "$BACKEND" = "CUDA"; then
+if  ! -z "$CUDA_HOME" ;
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: \"BACKEND = CUDA\"" >&5
 $as_echo "$as_me: \"BACKEND = CUDA\"" >&6;}
-		#GPURCUDA_CPPFLAGS="${GPURCUDA_CPPFLAGS} -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA"
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking \"Checking environment variable CUDA_HOME\"" >&5
-$as_echo_n "checking \"Checking environment variable CUDA_HOME\"... " >&6; }
-		if test -z "${CUDA_HOME}"; then
-		    CUDA_HOME=`find /usr/local/ -maxdepth 1 -type d -name "cuda*" | sort -V | tail -1`
-		    { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"CUDA_HOME not set; using highest version found ${CUDA_HOME}\"" >&5
-$as_echo "\"CUDA_HOME not set; using highest version found ${CUDA_HOME}\"" >&6; }
-		else
-		    { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"using CUDA_HOME=${CUDA_HOME}\"" >&5
-$as_echo "\"using CUDA_HOME=${CUDA_HOME}\"" >&6; }
-		fi
-
-		as_ac_File=`$as_echo "ac_cv_file_${CUDA_HOME}/bin/nvcc" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${CUDA_HOME}/bin/nvcc" >&5
-$as_echo_n "checking for ${CUDA_HOME}/bin/nvcc... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${CUDA_HOME}/bin/nvcc"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-  HAS_NVCC="yes"
-fi
-
-		if test -z "${HAS_NVCC}"; then
-		    as_fn_error $? "\"NVCC not found; check CUDA install\"" "$LINENO" 5
-		else
-		    { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"NVCC found\"" >&5
-$as_echo "\"NVCC found\"" >&6; }
-		fi
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking \"whether this is the 64 bit linux version of CUDA\"" >&5
-$as_echo_n "checking \"whether this is the 64 bit linux version of CUDA\"... " >&6; }
-		as_ac_File=`$as_echo "ac_cv_file_${CUDA_HOME}/lib64/libcudart.so" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${CUDA_HOME}/lib64/libcudart.so" >&5
-$as_echo_n "checking for ${CUDA_HOME}/lib64/libcudart.so... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "${CUDA_HOME}/lib64/libcudart.so"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-  BIT64="yes"
-fi
-
-		if test -z "${BIT64}"; then
-				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"no -- using ${CUDA_HOME}/lib for CUDA libs\"" >&5
-$as_echo "\"no -- using ${CUDA_HOME}/lib for CUDA libs\"" >&6; }
-				cu_libdir="${CUDA_HOME}/lib"
-				#AC_SUBST(CUDA_LIBDIR,["$cu_libdir"])
-		else
-				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"yes -- using ${CUDA_HOME}/lib64 for CUDA libs\"" >&5
-$as_echo "\"yes -- using ${CUDA_HOME}/lib64 for CUDA libs\"" >&6; }
-				cu_libdir="${CUDA_HOME}/lib64"
-				#AC_SUBST(CUDA_LIBDIR,["$cu_libdir"])
-		fi
-
-		GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
-		BACKEND="CUDA"
-
-else
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: \"No recognized BACKEND defined so trying CUDA first\"" >&5
-$as_echo "$as_me: \"No recognized BACKEND defined so trying CUDA first\"" >&6;}
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking \"Checking environment variable CUDA_HOME\"" >&5
-$as_echo_n "checking \"Checking environment variable CUDA_HOME\"... " >&6; }
 		if test -z "${CUDA_HOME}"; then
 		    CUDA_HOME=`find /usr/local/ -maxdepth 1 -type d -name "cuda*" | sort -V | tail -1`
 		fi
-
-		#else
-		#    AC_MSG_RESULT("using CUDA_HOME=${CUDA_HOME}")
-		#fi
 
 		if test -z "${CUDA_HOME}"; then
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"No CUDA installation found" >&5
 $as_echo "\"No CUDA installation found" >&6; }
-			#GPURCUDA_CPPFLAGS="${GPURCUDA_CPPFLAGS} -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP"
 			GPURCUDA_CXXFLAGS="${CXXFLAGS} -fopenmp"
 			BACKEND="OPENMP"
 
@@ -2822,7 +2709,6 @@ $as_echo "\"No CUDA installation found" >&6; }
 		else
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"using CUDA_HOME=${CUDA_HOME}\"" >&5
 $as_echo "\"using CUDA_HOME=${CUDA_HOME}\"" >&6; }
-			#AC_MSG_RESULT("CUDA_HOME not set; using highest version found ${CUDA_HOME}")
 
 			as_ac_File=`$as_echo "ac_cv_file_${CUDA_HOME}/bin/nvcc" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${CUDA_HOME}/bin/nvcc" >&5
@@ -2879,12 +2765,10 @@ fi
 					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"no -- using ${CUDA_HOME}/lib for CUDA libs\"" >&5
 $as_echo "\"no -- using ${CUDA_HOME}/lib for CUDA libs\"" >&6; }
 					cu_libdir="${CUDA_HOME}/lib"
-					#AC_SUBST(CUDA_LIBDIR,["$cu_libdir"])
 			else
 					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: \"yes -- using ${CUDA_HOME}/lib64 for CUDA libs\"" >&5
 $as_echo "\"yes -- using ${CUDA_HOME}/lib64 for CUDA libs\"" >&6; }
 					cu_libdir="${CUDA_HOME}/lib64"
-					#AC_SUBST(CUDA_LIBDIR,["$cu_libdir"])
 			fi
 
 			GPURCUDA_LIBS="${GPURCUDA_LIBS} -L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
@@ -2941,12 +2825,10 @@ if test x"${RSCRIPT}" == x"yes" ; then
 
     rcpp_incl=`${R_HOME}/bin/Rscript -e 'Rcpp:::CxxFlags()'`
     rcpparmadillo_incl=`${R_HOME}/bin/Rscript -e 'RcppArmadillo:::CxxFlags()'`
-    #thrust_incl=`${R_HOME}/bin/Rscript -e 'cat(paste("-I", system.file("include", package = "thrust"), sep = ""))'`
     RCPP_INCL="$rcpp_incl"
 
     RCPPARMA_INCL="$rcpparmadillo_incl"
 
-    #AC_SUBST(THRUST_INCL,["$thrust_incl"])
 else
     echo "
   Your installation does not appear to have Rscript installed.
