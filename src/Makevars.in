@@ -21,7 +21,13 @@ cu_sources := $(wildcard *.cu)
 cu_sharedlibs := $(patsubst %.cu, %.o, $(cu_sources))
 endif
 
+ifeq ($(BACKEND), CUDA)
 cpp_sources := $(wildcard *.cpp)
+cpp_sources := $(filter-out statC.cpp,$(cpp_sources))
+cpp_sources := $(filter-out sampleC.cpp,$(cpp_sources))
+else
+cpp_sources := $(wildcard *.cpp)
+endif
 cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
 
 ifeq ($(BACKEND), CUDA)
