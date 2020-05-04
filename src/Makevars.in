@@ -49,9 +49,11 @@ kernelPSI.so: $(OBJECTS)
 %.o: %.cpp $(cpp_sources)
 	$(CXX) $(CXX_ARGS) $(R_INC) -c $< -o $@
 
+CU_ARCH = 
+NVCC =
 ifeq ($(BACKEND), CUDA)
 	CU_ARCH = @CU_ARCH@
-	NVCC=@NVCC@
+	NVCC = @NVCC@
 	%.o: %.cu $(cu_sources)
 	$(NVCC) $(CU_ARCH) -DGPU -x cu -c $(CU_ARGS) $(CU_INCL) -c $< -o $@
 endif
