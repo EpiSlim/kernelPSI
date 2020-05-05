@@ -44,7 +44,8 @@ else
 
 	AC_MSG_NOTICE("BACKEND = CPU")
 	BACKEND="CPU"
-        KERNELPSI_LIBS="-Wl,-rpath"
+    
+	KERNELPSI_LIBS="-Wl,-rpath"
        
 fi
 
@@ -72,9 +73,11 @@ fi
 R_INCL=`"${R_HOME}/bin/R" CMD config --cppflags`
 R_LIBS=`"${R_HOME}/bin/R" CMD config --ldflags`
 R_CPIC=`"${R_HOME}/bin/R" CMD config CPICFLAGS`
+CXX="gcc"
 
 AC_MSG_NOTICE([Building Makevars])
 AC_SUBST(BACKEND)
+AC_SUBST(CXX)
 AC_SUBST(KERNELPSI_CPPFLAGS)
 AC_SUBST(KERNELPSI_CXXFLAGS)
 AC_SUBST(KERNELPSI_LIBS)

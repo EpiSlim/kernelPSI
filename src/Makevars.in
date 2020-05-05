@@ -29,12 +29,14 @@ endif
 
 R_INC = @R_INCL@ @RCPP_INCL@ @RCPPARMA_INCL@
 CXX_ARGS = @R_CPIC@
+CXX_ARGS += -O3 -DNDEBUG -Wall -pedantic
 
 CU_ARGS := -Xcompiler -fPIC -std=c++11
 CU_ARGS += -Xcudafe --diag_suppress=code_is_unreachable
 CU_ARGS += -Xcudafe --diag_suppress=initialization_not_reachable
 CU_ARGS += -Xcudafe --diag_suppress=missing_initializer_on_const
 CU_ARGS += -Xcudafe --diag_suppress=declared_but_not_referenced
+CU_ARGS += -O3 -DNDEBUG  -DGPU -x cu
 CU_INCL = @R_INCL@ @RCPPARMA_INCL@ @RCPP_INCL@ 
 
 CXX = @CXX@
@@ -44,7 +46,7 @@ all: kernelPSI.so
 kernelPSI.so: $(OBJECTS)
 
 %.o: %.cpp $(cpp_sources)
-	$(CXX) -O3 -DNDEBUG -Wall -pedantic $(CXX_ARGS) $(R_INC) -c $< -o $@
+	$(CXX)  $(CXX_ARGS) $(R_INC) -c $< -o $@
 
 CU_ARCH = 
 NVCC =
@@ -52,9 +54,8 @@ ifeq ($(BACKEND), CUDA)
 CU_ARCH = @CU_ARCH@
 NVCC = @NVCC@
 %.o: %.cu $(cu_sources)
-	$(NVCC) $(CU_ARCH) -O3 -DNDEBUG  -DGPU -x cu -c $(CU_ARGS) $(CU_INCL) -c $< -o $@
+	$(NVCC) $(CU_ARCH) $(CU_ARGS) $(CU_INCL) -c $< -o $@
 endif
-
 
 clean:
 	@rm -rf *.o *.so *.dll
