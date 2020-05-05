@@ -126,6 +126,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// statC2
+double statC2(arma::vec sample, arma::mat replicates, arma::field<arma::mat> K);
+RcppExport SEXP _kernelPSI_statC2(SEXP sampleSEXP, SEXP replicatesSEXP, SEXP KSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type sample(sampleSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type replicates(replicatesSEXP);
+    Rcpp::traits::input_parameter< arma::field<arma::mat> >::type K(KSEXP);
+    rcpp_result_gen = Rcpp::wrap(statC2(sample, replicates, K));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_kernelPSI_adaFOHSIC", (DL_FUNC) &_kernelPSI_adaFOHSIC, 2},
@@ -137,6 +150,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_kernelPSI_sampleC", (DL_FUNC) &_kernelPSI_sampleC, 7},
     {"_kernelPSI_sampleH", (DL_FUNC) &_kernelPSI_sampleH, 7},
     {"_kernelPSI_statC", (DL_FUNC) &_kernelPSI_statC, 3},
+    {"_kernelPSI_statC2", (DL_FUNC) &_kernelPSI_statC2, 3},
     {NULL, NULL, 0}
 };
 

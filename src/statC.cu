@@ -98,7 +98,7 @@ double statC(arma::vec sample, arma::mat replicates,
 
   cudaMemcpy(stat.memptr(), statCUDA, replicates.n_cols * sizeof(double),
              cudaMemcpyHostToHost);
-
+   Rcout << "First value" << *statS << std::endl;
   // Compute p-value
   double pvalue = arma::sum(stat > *statS) / (double)replicates.n_cols;
 

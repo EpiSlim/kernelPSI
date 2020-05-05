@@ -255,3 +255,7 @@ statC <- function(sample, replicates, K) {
     .Call(`_kernelPSI_statC`, sample, replicates, K)
 }
 
+statC2 <- function(sample, replicates, K) {
+    .Call(`_kernelPSI_statC2`, sample, replicates, K)
+}
+
