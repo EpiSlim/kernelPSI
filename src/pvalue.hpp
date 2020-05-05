@@ -27,7 +27,7 @@
 //' constraintQ <- forwardQ(K, select = selection)
 //' samples <- sampleH(A = constraintQ, initial = Y,
 //'                    n_replicates = 50, burn_in = 20)
-//' pvalue <- statC(Y, samples, K[selection])
+//' pvalue <- pvalue(Y, samples, K[selection])
 //' 
 //' @export
 // [[Rcpp::export]]
