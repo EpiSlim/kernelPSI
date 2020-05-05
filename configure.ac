@@ -39,15 +39,13 @@ if test "${CUDA_HOME}"; then
 	CU_ARCH=`python inst//python//arch_detect.py`
 	AC_SUBST(CU_ARCH)
 
-	KERNELPSI_LIBS="-L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas"
-
+	KERNELPSI_LIBS="-L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas" 
 else
 
 	AC_MSG_NOTICE("BACKEND = CPU")
 	BACKEND="CPU"
-
-	KERNELPSI_LIBS="-Wl,-rpath"
-
+        KERNELPSI_LIBS="-Wl,-rpath"
+       
 fi
 
 ## look for Rscript, but use the one found via R_HOME to allow for multiple installations

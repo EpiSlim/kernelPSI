@@ -2775,18 +2775,16 @@ $as_echo "\"no -- using ${CUDA_HOME}/lib for CUDA libs\"" >&6; }
 
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking \"determining GPU architecture\"" >&5
 $as_echo_n "checking \"determining GPU architecture\"... " >&6; }
-	CU_ARCH=`python inst/python/arch_detect.py`
+	CU_ARCH=`python inst//python//arch_detect.py`
 
 
-	KERNELPSI_LIBS="-L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas -lcurand"
-
+	KERNELPSI_LIBS="-L${cu_libdir} -Wl,-rpath,${cu_libdir} -lcudart -lcublas"
 else
 
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: \"BACKEND = CPU\"" >&5
 $as_echo "$as_me: \"BACKEND = CPU\"" >&6;}
 	BACKEND="CPU"
-
-	KERNELPSI_LIBS="-Wl,-rpath"
+        KERNELPSI_LIBS="-Wl,-rpath"
 
 fi
 
