@@ -14,8 +14,8 @@ endif
 
 ifeq ($(BACKEND), CUDA)
 cpp_sources := $(wildcard *.cpp)
-cpp_sources := $(filter-out statC_cpu.cpp,$(cpp_sources))
-cpp_sources := $(filter-out sampleC_cpu.cpp,$(cpp_sources))
+cpp_sources := $(filter-out pvalue.cpp,$(cpp_sources))
+cpp_sources := $(filter-out sampleH.cpp,$(cpp_sources))
 else
 cpp_sources := $(wildcard *.cpp)
 endif

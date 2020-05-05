@@ -12,7 +12,7 @@ using namespace Rcpp;
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
-arma::mat sampleC(arma::field<arma::mat> A, NumericVector initial,
+arma::mat sampleH(arma::field<arma::mat> A, NumericVector initial,
                    int n_replicates, double mu = 0.0, double sigma = 1.0,
                    int n_iter = 1.0e+5, int burn_in = 1.0e+3) {
 

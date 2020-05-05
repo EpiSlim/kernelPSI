@@ -189,8 +189,37 @@ quadHSIC <- function(K) {
     .Call(`_kernelPSI_quadHSIC`, K)
 }
 
-sampleC <- function(A, initial, n_replicates, mu, sigma, n_iter, burn_in) {
-    .Call(`_kernelPSI_sampleC`, A, initial, n_replicates, mu, sigma, n_iter, burn_in)
+#' computes a p-value for the quadratic kernel association score
+#' 
+#' Computing exact \eqn{p}-values for quadratic association scores is often out of 
+#' reach. Sampling replicates of the original outcome \code{sample} can help in this regard. 
+#' The replicates are sampled using the function \code{\link{sampleH}}. Here, we
+#' compute the statistics of these replicates and compare them to the statistic of the 
+#' original outcome to determine an empirical \eqn{p}-value. 
+#'
+#' @param sample original outcome vector
+#' @param replicates matrix of valid replicates. Each column of this matrix corresponds to a
+#' distinct replicate
+#' @param K a list of matrices corresponding to the Gram matrices of the selected kernels
+#'
+#' @return an empirical \eqn{p}-value
+#' 
+#' @examples
+#' n <- 30
+#' p <- 20
+#' K <- replicate(5, matrix(rnorm(n*p), nrow = n, ncol = p), simplify = FALSE)
+#' K <-  sapply(K, function(X) return(X %*% t(X) / dim(X)[2]), simplify = FALSE)
+#' Y <- rnorm(n)
+#' L <- Y %*% t(Y)
+#' selection <- FOHSIC(K, L, 2)
+#' constraintQ <- forwardQ(K, select = selection)
+#' samples <- sampleH(A = constraintQ, initial = Y,
+#'                    n_replicates = 50, burn_in = 20)
+#' pvalue <- statC(Y, samples, K[selection])
+#' 
+#' @export
+pvalue <- function(sample, replicates, K) {
+    .Call(`_kernelPSI_pvalue`, sample, replicates, K)
 }
 
 #' samples within the acceptance region defined by the kernel selection event
@@ -249,13 +278,5 @@ sampleC <- function(A, initial, n_replicates, mu, sigma, n_iter, burn_in) {
 #' @export
 sampleH <- function(A, initial, n_replicates, mu = 0.0, sigma = 1.0, n_iter = 1.0e+5, burn_in = 1.0e+3) {
     .Call(`_kernelPSI_sampleH`, A, initial, n_replicates, mu, sigma, n_iter, burn_in)
-}
-
-statC <- function(sample, replicates, K) {
-    .Call(`_kernelPSI_statC`, sample, replicates, K)
-}
-
-statC2 <- function(sample, replicates, K) {
-    .Call(`_kernelPSI_statC2`, sample, replicates, K)
 }
 

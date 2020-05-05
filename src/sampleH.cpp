@@ -27,7 +27,7 @@ arma::mat sampleH(arma::field<arma::mat> A, NumericVector initial, int n_replica
         candidateO = candidateN;
         for (int iter = 0; iter < n_iter; ++iter)
         {
-            //if (iter == n_iter) stop("The quadratic constraints cannot be satisfied");
+            if (iter == n_iter) stop("The quadratic constraints cannot be satisfied");
             boundA = -(candidateO/theta.col(s));
             boundB = (1 - candidateO)/theta.col(s);
             double leftQ = std::max(boundA.elem(arma::find(theta.col(s) > 0)).max(),
